@@ -61,7 +61,7 @@
 
 [CSDN 个人主页](https://qinyingjie.blog.csdn.net/?type=blog)
 
-[CSDN三连管理前端Git地址](https://gitcode.net/qyj19920704/vue-springboot-kwan)
+[CSDN三连管理前端Git地址](https://gitcode.net/qyj19920704/vue-kwan-admin)
 
 ### 4.CSDN 自身限制
 
@@ -85,7 +85,7 @@
 
 结合前端使用,效果更佳
 
-[CSDN三连管理前端Git地址](https://gitcode.net/qyj19920704/vue-springboot-kwan)
+[CSDN三连管理前端Git地址](https://gitcode.net/qyj19920704/vue-kwan-admin)
 
 ![image-20231104000617161](docs/pic/前端展示.png)
 
