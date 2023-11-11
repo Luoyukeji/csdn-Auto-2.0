@@ -64,16 +64,23 @@ public class CsdnMessageServiceImpl extends ServiceImpl<CsdnHistorySessionMapper
                 for (int i = sessions.size() - 1; i >= 0; i--) {
                     final MessageResponse.MessageData.Sessions session = sessions.get(i);
                     final String username = session.getUsername();
-                        CsdnHistorySession csdnHistorySession = this.getCsdnHistorySession(username);
-                        if (Objects.isNull(csdnHistorySession)) {
-                            csdnHistorySession = new CsdnHistorySession();
-                            csdnHistorySession.setUserName(username);
-                            csdnHistorySession.setNickName(session.getNickname());
-                            csdnHistorySession.setContent(session.getContent());
-                            csdnHistorySession.setHasReplied(session.getHasReplied() ? 1 : 0);
-                            csdnHistorySession.setMessageUrl("https://i.csdn.net/#/msg/chat/" + username);
-                            this.save(csdnHistorySession);
+                    final String content = session.getContent();
+                    CsdnHistorySession csdnHistorySession = this.getCsdnHistorySession(username);
+                    if (Objects.isNull(csdnHistorySession)) {
+                        csdnHistorySession = new CsdnHistorySession();
+                        csdnHistorySession.setUserName(username);
+                        csdnHistorySession.setNickName(session.getNickname());
+                        csdnHistorySession.setContent(content);
+                        csdnHistorySession.setHasReplied(session.getHasReplied() ? 1 : 0);
+                        csdnHistorySession.setMessageUrl("https://i.csdn.net/#/msg/chat/" + username);
+                        this.save(csdnHistorySession);
+                    } else {
+                        final String contentHistory = csdnHistorySession.getContent();
+                        if (!StringUtils.equals(content, contentHistory)) {
+                            csdnHistorySession.setContent(content);
+                            this.updateById(csdnHistorySession);
                         }
+                    }
                 }
             }
             return sessions;
