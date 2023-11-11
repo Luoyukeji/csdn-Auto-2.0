@@ -1,0 +1,36 @@
+server:
+  port: 80
+  compression:
+    enabled: true
+    min-response-size: 512KB
+    mime-types:
+      - text/html
+      - application/json
+#兼容swagger配置
+spring:
+  # mysql
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://120.79.36.53:3306/kwan?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: xxxx
+
+csdn:
+  num_of_articles_per_person: 1  #每人文章个数
+  self_user_name: "xxxxx"  #自己的用户id
+  self_folder_id: 7589042  #自己的收藏夹id
+  auto_add_view_count: 2000  #刷浏览量数量
+  #自己的评论,发布雷同会被封,多条随机,避免被封
+  self_comment: 大帅b1号; 大帅b2号;大帅b3号
+  #自动回复评论
+  self_reply: 大佬！;大佬！;大佬！
+  #cookie,身份验证
+  cookie: "uuid_tt_dd=10_ategy522qyj19920704; UserInfo=a7d3b88c53a841ebb5792202cb43c84f; UserToken=a7d3b88c53a841ebb5792202cb43c84f; UserNick=%E6%AA%80%E8%B6%8A%E5%89%91%E6%8C%87%E5%A4%A7%E5%8E%82; AU=769; UN=qyj19920704; BT=1697522886100; p_uid=U010000; Hm_up_6bcd52f51e9b3dce32bec4a3997715ac=%7B%22islogin%22%3A%7B%22value%22%3A%221%22%2C%22scope%22%3A1%7D%2C%22isonline%22%3A%7B%22value%22%3A%221%22%2C%22scope%22%3A1%7D%2C%22isvip%22%3A%7B%22value%22%3A%220%22%2C%22scope%22%3A1%7D%2C%22uid_%22%3A%7B%22value%22%3A%22qyj19920704%22%2C%22scope%22%3A1%7D%7D; management_ques=1697592152734; blog_details_recommend_nps=1697616147423; c_segment=3; Hm_lvt_6bcd52f51e9b3dce32bec4a3997715ac=1697522874,1697551027,1697636661,1697683407; csrfToken=jTRD3_1IBVA703lu2FkVkazx; dc_sid=9f7a02ed8375e91d86271ddaf1cf2ce4; c_first_ref=default; c_first_page=https%3A//liucy.blog.csdn.net/article/details/133852303%3Fspm%3D1001.2014.3001.5502; c_segment=3; Hm_lvt_e5ef47b9f471504959267fd614d579cd=1697764951; Hm_lpvt_e5ef47b9f471504959267fd614d579cd=1697764951; 404_page_nps=1697764955523; ssxmod_itna=YqUxBD97kOGHD8D2BmYite44zxcYo1=WOiox0vmvqGzDAxn40iDtgeqODDwu0/DNMQiDpiDuWOntaV73S5fd3iPeaN3D84i7DKqibDCqD1D3qDktzDYA8Dt4DTD34DYDiO=DBRsUQDFATN/3wUjmGtDG4DgDB=DxBEl3djBAq4DCr4DbxPy7mrDtLNSeLLdXT0/nn5Yf445SOG5lipwm0GdG7vwBA4PlDxNt8v1wADoGGGQYf+IE75ep753zpDxD; ssxmod_itna2=YqUxBD97kOGHD8D2BmYite44zxcYo1=WOYxn9EenDDsYebDLGQCoqQuGvHdDQRKYubdD6QqomsRD3xyRI/W9Q5nhe8oeYUvimaWYrNsqwcDgL6mDjYUhZK09LYcY/t5hSuP2va/kclf6hRkNh+LPyDwic73=9i4d94Lvw/R=oQ7E+jT4jjjA2Y+=QplLm8nbePRb+7=Re1CpjmZ4wIrnNPSKofWnIj=WOtkFtphylt+GhUxr0KkGtTzDXKDEEkbn3qhIn3Sj/ezt1u2MO3M9h7zEL6RunrXaKE+YdkRnIKiTG93cqpGFq8Fwr7ehksk1ZSWhoN2hQydddqQ1bTOSW8ddX+7g24v4TZ0+52=Y8PsOwfhavW4ECY8+GZOK=ro97bK0=Yi3YD5ZGsq25FhPodIRGCD2O8xidfo8+NR88v+rq4+b=fUOEK2frPEPdLFuYkao9uCfM1+cFZQ7q6HEMfRLjf6bhof0=1YhEYO1U=NZCPvDDw2Psluciq4De13mDNBODwqLwwg44qwOiDf=j1fKK5q+8gd7DDjKDeMv/04YDmLGvrwqOz4cov79500D4D==; c_first_ref=default; c_first_page=https%3A//mp.csdn.net/; creative_btn_mp=3; c_hasSub=true; write_guide_show=3; log_Id_click=177; dc_session_id=11_1698022100317.787671; c_dsid=11_1698022100317.794351; log_Id_pv=149; log_Id_view=1105; c_pref=https%3A//i.csdn.net/; c_ref=https%3A//blog.csdn.net/imwucx; c_page_id=default; dc_session_id=11_1698022100317.787671; c_dsid=11_1698022100317.794351; log_Id_view=1106; dc_tos=s2yi9b; log_Id_click=178; c_pref=https%3A//blog.csdn.net/imwucx; log_Id_pv=150; c_ref=https%3A//blog.csdn.net/imwucx/article/details/133915120%3Fspm%3D1001.2014.3001.5501; creativeSetApiNew=%7B%22toolbarImg%22%3Anull%2C%22publishSuccessImg%22%3Anull%2C%22articleNum%22%3A895%2C%22type%22%3A0%2C%22oldUser%22%3Afalse%2C%22useSeven%22%3Afalse%2C%22userName%22%3A%22qyj19920704%22%7D; c_page_id=default; Hm_lpvt_6bcd52f51e9b3dce32bec4a3997715ac=1698023119; dc_tos=s2yj16"
+  url:
+    user_article_url: "https://blog.csdn.net/community/home-api/v1/get-business-list" #获取用户文章接口
+    is_collect_url: "https://blog.csdn.net/phoenix/web/v1/isCollect" #是否收藏接口
+    add_collect_url: "https://mp-action.csdn.net/interact/wrapper/pc/favorite/v1/api/addFavoriteInFolds" #添加收藏接口
+    is_comment_list_url: "https://blog.csdn.net/phoenix/web/v1/comment/list/"  #查询评论接口
+    comment_url: "https://blog.csdn.net/phoenix/web/v1/comment/submit"  #评论接口
+    like_url: "https://blog.csdn.net//phoenix/web/v1/article/like"  #点赞接口
+    get_article_score_url: "https://bizapi.csdn.net/trends/api/v1/get-article-score"  #质量分接口

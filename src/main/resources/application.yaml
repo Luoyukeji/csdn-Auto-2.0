@@ -1,0 +1,29 @@
+#兼容swagger配置
+spring:
+  profiles:
+    active: test
+  application:
+    name: vue-springboot-kwan
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+#mybatis-plus配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+    auto-mapping-behavior: full
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  global-config:
+    banner: true
+    db-config:
+      id-type: AUTO
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      table-underline: true
+
+#logger配置
+logging:
+  config: classpath:logback-spring.xml

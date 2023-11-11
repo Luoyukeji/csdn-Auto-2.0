@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="log.charset" value="utf-8"/>
+    <property name="console.log.pattern"
+              value="%red(%d{yyyy-MM-dd HH:mm:ss}) %green([%thread]) %highlight(%-5level) %boldMagenta(%logger{36}) - %blue(%msg%n)"/>
+    <property name="file.log.pattern"
+              value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${console.log.pattern}</pattern>
+            <charset>${log.charset}</charset>
+        </encoder>
+    </appender>
+
+    <springProfile name="dev,test,local">
+        <property name="log.dir" value="./logs/"/>
+        <property name="file.log.pattern"
+                  value="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%thread] %logger{36} - %msg%n"/>
+
+        <appender name="SYSTEM_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">　　　　　　　　　　　　
+                <fileNamePattern>${log.dir}system/%d.log</fileNamePattern>　　
+            </rollingPolicy>
+            <encoder>
+                <pattern>${file.log.pattern}</pattern>
+                <charset>${log.charset}</charset>
+            </encoder>
+            <append>true</append>
+        </appender>
+
+        <appender name="SQL_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">　　　　　　　　　　　　
+                <fileNamePattern>${log.dir}/sql/%d.log</fileNamePattern>　　
+            </rollingPolicy>
+            <encoder>
+                <pattern>${file.log.pattern}</pattern>
+                <charset>${log.charset}</charset>
+            </encoder>
+            <append>true</append>
+        </appender>
+    </springProfile>
+
+    <!--    如果是本地环境,则设置控制台打印-->
+    <springProfile name="test">
+        <logger name="com.kwan.springbootkwan.mapper" level="DEBUG" additivity="false">
+            <appender-ref ref="STDOUT"/>
+        </logger>
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <!--    如果是dev和test环境,则不设置控制台打印,将日志保存到不同的文件-->
+    <springProfile name="dev">
+        <logger name="com.kwan.springbootkwan.mapper" level="DEBUG" additivity="false">
+            <appender-ref ref="SQL_LOG"/>
+        </logger>
+        <root level="INFO">
+            <appender-ref ref="SYSTEM_LOG"/>
+        </root>
+    </springProfile>
+</configuration>

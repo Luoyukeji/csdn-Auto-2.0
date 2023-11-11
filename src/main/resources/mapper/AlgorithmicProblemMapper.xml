@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kwan.springbootkwan.mapper.AlgorithmicProblemMapper">
+
+    <select id="questionType" resultType="com.kwan.springbootkwan.entity.dto.AlgorithmicQuestionTypeDTO">
+        SELECT DISTINCT question_type AS questionType, COUNT(*) AS typeSize
+        FROM algorithmic_problem
+        WHERE 1 = 1
+          AND is_delete = 0
+          AND question_type != 0
+        GROUP BY question_type
+        ORDER BY typeSize DESC
+    </select>
+</mapper>
