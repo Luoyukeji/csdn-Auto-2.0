@@ -39,9 +39,9 @@ public class LikeCollectResponse {
                 public Integer taskId;
                 public String tc;
                 public String username;
+                public String nickname;
+                public boolean isFans;
                 public Object identity;
-                public Object nickname;
-                public Object isFans;
                 public Object reviewContent;
                 public Object commentId;
                 public Object templateId;
