@@ -1,5 +1,15 @@
--- kwan.algorithmic_problem definition
+--删除数据库
+DROP
+DATABASE IF EXISTS kwan;
+--创建数据库
+CREATE
+DATABASE kwan;
+--切换数据库
+USE
+kwan;
 
+-- kwan.algorithmic_problem definition
+DROP TABLE IF EXISTS `algorithmic_problem1`;
 CREATE TABLE `algorithmic_problem`
 (
     `id`                   int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -18,7 +28,7 @@ CREATE TABLE `algorithmic_problem`
 
 
 -- kwan.aphorism_poetry definition
-
+DROP TABLE IF EXISTS `aphorism_poetry`;
 CREATE TABLE `aphorism_poetry`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -31,7 +41,7 @@ CREATE TABLE `aphorism_poetry`
 
 
 -- kwan.chatbot definition
-
+DROP TABLE IF EXISTS `chatbot`;
 CREATE TABLE `chatbot`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT,
@@ -44,7 +54,7 @@ CREATE TABLE `chatbot`
 
 
 -- kwan.csdn_article_info definition
-
+DROP TABLE IF EXISTS `csdn_article_info`;
 CREATE TABLE `csdn_article_info`
 (
     `id`                  int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -69,7 +79,7 @@ CREATE TABLE `csdn_article_info`
 
 
 -- kwan.csdn_history_session definition
-
+DROP TABLE IF EXISTS `csdn_history_session`;
 CREATE TABLE `csdn_history_session`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -88,7 +98,7 @@ CREATE TABLE `csdn_history_session`
 
 
 -- kwan.csdn_triplet_day_info definition
-
+DROP TABLE IF EXISTS `csdn_triplet_day_info`;
 CREATE TABLE `csdn_triplet_day_info`
 (
     `id`             int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -109,7 +119,7 @@ CREATE TABLE `csdn_triplet_day_info`
 
 
 -- kwan.csdn_user_info definition
-
+DROP TABLE IF EXISTS `csdn_user_info`;
 CREATE TABLE `csdn_user_info`
 (
     `id`             int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -131,7 +141,7 @@ CREATE TABLE `csdn_user_info`
 
 
 -- kwan.department definition
-
+DROP TABLE IF EXISTS `department`;
 CREATE TABLE `department`
 (
     `id`         int                                                           NOT NULL AUTO_INCREMENT,
@@ -146,7 +156,7 @@ CREATE TABLE `department`
 
 
 -- kwan.dictionary_management definition
-
+DROP TABLE IF EXISTS `dictionary_management`;
 CREATE TABLE `dictionary_management`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -161,7 +171,7 @@ CREATE TABLE `dictionary_management`
 
 
 -- kwan.interview_question definition
-
+DROP TABLE IF EXISTS `interview_question`;
 CREATE TABLE `interview_question`
 (
     `id`            int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -176,7 +186,7 @@ CREATE TABLE `interview_question`
 
 
 -- kwan.pic_info definition
-
+DROP TABLE IF EXISTS `pic_info`;
 CREATE TABLE `pic_info`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT,

@@ -30,15 +30,14 @@
 - 新增前端其他模块的接口,避免启动前端报错,也方便自己同步代码;
 - 新增前端私信管理,页面化一键管理私信;
 - 新增其他用户给自己点赞收藏的管理
-  - 如果是粉丝,则三连并发送已完成三连私信
-  - 如果不是粉丝,只三连
-  - 并且是粉丝的优先级高于不是粉丝的处理优先级
+    - 如果是粉丝,则三连并发送已完成三连私信
+    - 如果不是粉丝,只三连
+    - 并且是粉丝的优先级高于不是粉丝的处理优先级
 
 - 三连优先级更新
-  - 第一优先级为评论自己最近5篇博客的用户
-  - 第二优先级为给自己点赞和收藏的用户,如果是粉丝则私信,不是粉丝不私信
-  - 第三优先级为私信用户
-
+    - 第一优先级为评论自己最近5篇博客的用户
+    - 第二优先级为给自己点赞和收藏的用户,如果是粉丝则私信,不是粉丝不私信
+    - 第三优先级为私信用户
 
 #### v0.0.1-20231110
 
@@ -176,6 +175,19 @@ alter table kwan.table add column `xxxx_name` varchar(100) default null COMMENT 
 - 运行文件
 
 ![image-20231111104559655](docs/pic/AppApplication.png)
+
+`本地启动报错`
+
+```apl
+Internal error in the mapping processor: java.lang.NullPointerException  	at org.mapstruct.ap.internal.processor.Defau
+```
+
+```apl
+#添加配置
+-Djps.track.ap.dependencies=false
+```
+
+![image-20231111224824465](docs/pic/compile.png)
 
 ### 2.jar包运行
 
