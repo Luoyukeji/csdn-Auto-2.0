@@ -1,3 +1,50 @@
+-- kwan.algorithmic_problem definition
+
+CREATE TABLE `algorithmic_problem`
+(
+    `id`                   int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `question_name`        varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+    `question_type`        int NOT NULL                                                  DEFAULT '0' COMMENT '0:''全部'';\n1: ''基础知识'';\n2: ''集合'';\n3: ''JVM'';\n4: ''并发编程'';\n5:''MySql'';\n6: ''Redis'';\n7: ''中间件'';\n8: ''Spring'';\n9: ''微服务'';\n10:''分布式'';\n11:''项目'';\n12:''算法'';\n99: ''其他'';',
+    `degree_of_importance` int NOT NULL                                                  DEFAULT '0' COMMENT '1~10的分值',
+    `degree_of_difficulty` int NOT NULL                                                  DEFAULT '1' COMMENT '1:简单;2:中等;3:困难',
+    `difficulty_of_score`  int NOT NULL                                                  DEFAULT '0' COMMENT '困难指数',
+    `leetcode_number`      int                                                           DEFAULT NULL COMMENT '力扣的问题号',
+    `leetcode_link`        varchar(200)                                                  DEFAULT NULL COMMENT '力扣的问题号',
+    `create_time`          timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `is_delete`            tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除,0未删除,1已删除',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY                    `interview_question_question_IDX` (`question_name`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='算法题';
+
+
+-- kwan.aphorism_poetry definition
+
+CREATE TABLE `aphorism_poetry`
+(
+    `id`          int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `poetry_text` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '诗词内容',
+    `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `is_delete`   tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除,0未删除,1已删除',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY           `interview_question_question_IDX` (`poetry_text`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='名言警句';
+
+
+-- kwan.chatbot definition
+
+CREATE TABLE `chatbot`
+(
+    `id`          int unsigned NOT NULL AUTO_INCREMENT,
+    `question`    text,
+    `response`    text,
+    `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `is_delete`   tinyint(1) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='聊天机器人记录表';
+
+
+-- kwan.csdn_article_info definition
+
 CREATE TABLE `csdn_article_info`
 (
     `id`                  int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -19,6 +66,25 @@ CREATE TABLE `csdn_article_info`
     UNIQUE KEY `unique_user_name` (`article_id`),
     KEY                   `interview_question_question_IDX` (`article_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='csdn文章信息';
+
+
+-- kwan.csdn_history_session definition
+
+CREATE TABLE `csdn_history_session`
+(
+    `id`          int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `user_name`   varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'CSDN用户名称',
+    `nick_name`   varchar(100)                                                  DEFAULT NULL COMMENT 'CSDN用户昵称',
+    `content`     text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '回复内容',
+    `message_url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '私信地址',
+    `has_replied` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0未回复,1已回复',
+    `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `is_delete`   tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除,0未删除,1已删除',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `unique_user_name` (`user_name`),
+    KEY           `interview_question_question_IDX` (`user_name`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='csdn私信用户管理';
 
 
 -- kwan.csdn_triplet_day_info definition
@@ -63,20 +129,61 @@ CREATE TABLE `csdn_user_info`
     KEY              `interview_question_question_IDX` (`user_name`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='csdn用户信息';
 
--- kwan.csdn_history_session definition
 
-CREATE TABLE `csdn_history_session`
+-- kwan.department definition
+
+CREATE TABLE `department`
+(
+    `id`         int                                                           NOT NULL AUTO_INCREMENT,
+    `dept_name`  varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    `parent_id`  int                                                           DEFAULT NULL,
+    `remark`     varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `created_at` datetime                                                      DEFAULT NULL,
+    `deleted`    tinyint(1) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    KEY          `department_parent_id_IDX` (`parent_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='部门';
+
+
+-- kwan.dictionary_management definition
+
+CREATE TABLE `dictionary_management`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
-    `user_name`   varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'CSDN用户名称',
-    `nick_name`   varchar(100)                                                  DEFAULT NULL COMMENT 'CSDN用户昵称',
-    `content`     text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '回复内容',
-    `message_url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '私信地址',
-    `has_replied` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0未回复,1已回复',
+    `dict_type`   int NOT NULL                                                 DEFAULT '0' COMMENT '字典类型',
+    `code`        int NOT NULL                                                 DEFAULT '0' COMMENT '字典code',
+    `name`        varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '字典名称',
     `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_delete`   tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除,0未删除,1已删除',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE KEY `unique_user_name` (`user_name`),
-    KEY           `interview_question_question_IDX` (`user_name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='csdn私信用户管理';
+    KEY           `interview_question_question_IDX` (`dict_type`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='字典表';
+
+
+-- kwan.interview_question definition
+
+CREATE TABLE `interview_question`
+(
+    `id`            int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `question`      varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+    `response`      text COMMENT '问题回答',
+    `question_type` int NOT NULL                                                  DEFAULT '0' COMMENT '0:''全部'';\n1: ''基础知识'';\n2: ''集合'';\n3: ''JVM'';\n4: ''并发编程'';\n5:''MySql'';\n6: ''Redis'';\n7: ''中间件'';\n8: ''Spring'';\n9: ''微服务'';\n10:''分布式'';\n11:''项目'';\n12:''算法'';\n99: ''其他'';',
+    `create_time`   timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `is_delete`     tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除,0未删除,1已删除',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY             `interview_question_question_IDX` (`question`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='面试题';
+
+
+-- kwan.pic_info definition
+
+CREATE TABLE `pic_info`
+(
+    `id`          int unsigned NOT NULL AUTO_INCREMENT,
+    `pic_name`    varchar(100) NOT NULL COMMENT '图片名称',
+    `pic_url`     varchar(255) NOT NULL COMMENT '图片地址',
+    `type`        tinyint(1) NOT NULL DEFAULT '0' COMMENT '图片类型,0:表示宝宝图片,1:学习图片,2:风景,3:美女,99:其他',
+    `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `is_delete`   tinyint(1) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='图片信息表';
