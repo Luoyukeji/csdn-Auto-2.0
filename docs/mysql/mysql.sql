@@ -1,4 +1,3 @@
-
 CREATE TABLE `csdn_article_info`
 (
     `id`                  int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -63,3 +62,21 @@ CREATE TABLE `csdn_user_info`
     UNIQUE KEY `unique_user_name` (`user_name`),
     KEY              `interview_question_question_IDX` (`user_name`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='csdn用户信息';
+
+-- kwan.csdn_history_session definition
+
+CREATE TABLE `csdn_history_session`
+(
+    `id`          int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `user_name`   varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'CSDN用户名称',
+    `nick_name`   varchar(100)                                                  DEFAULT NULL COMMENT 'CSDN用户昵称',
+    `content`     text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '回复内容',
+    `message_url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '私信地址',
+    `has_replied` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0未回复,1已回复',
+    `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `is_delete`   tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除,0未删除,1已删除',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `unique_user_name` (`user_name`),
+    KEY           `interview_question_question_IDX` (`user_name`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='csdn私信用户管理';

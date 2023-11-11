@@ -3,13 +3,17 @@ package com.kwan.springbootkwan.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kwan.springbootkwan.constant.CommonConstant;
+import com.kwan.springbootkwan.entity.CsdnHistorySession;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.csdn.MessageHistoryListResponse;
 import com.kwan.springbootkwan.entity.csdn.MessageResponse;
+import com.kwan.springbootkwan.mapper.CsdnHistorySessionMapper;
 import com.kwan.springbootkwan.service.CsdnArticleInfoService;
 import com.kwan.springbootkwan.service.CsdnMessageService;
 import com.kwan.springbootkwan.service.CsdnService;
@@ -27,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class CsdnMessageServiceImpl implements CsdnMessageService {
+public class CsdnMessageServiceImpl extends ServiceImpl<CsdnHistorySessionMapper, CsdnHistorySession> implements CsdnMessageService {
 
     @Value("${csdn.cookie}")
     private String csdnCookie;
@@ -47,14 +51,32 @@ public class CsdnMessageServiceImpl implements CsdnMessageService {
         HttpResponse response = HttpUtil.createGet(url)
                 .header("Cookie", csdnCookie)
                 .form("page", 1)
-                .form("pageSize", 40)
+                .form("pageSize", 100)
                 .execute();
         final String body = response.body();
         ObjectMapper objectMapper = new ObjectMapper();
         MessageResponse businessInfoResponse;
         try {
             businessInfoResponse = objectMapper.readValue(body, MessageResponse.class);
-            return businessInfoResponse.getData().getSessions();
+            final List<MessageResponse.MessageData.Sessions> sessions = businessInfoResponse.getData().getSessions();
+            if (CollectionUtil.isNotEmpty(sessions)) {
+                //反向遍历主要是为了和展示一致
+                for (int i = sessions.size() - 1; i >= 0; i--) {
+                    final MessageResponse.MessageData.Sessions session = sessions.get(i);
+                    final String username = session.getUsername();
+                        CsdnHistorySession csdnHistorySession = this.getCsdnHistorySession(username);
+                        if (Objects.isNull(csdnHistorySession)) {
+                            csdnHistorySession = new CsdnHistorySession();
+                            csdnHistorySession.setUserName(username);
+                            csdnHistorySession.setNickName(session.getNickname());
+                            csdnHistorySession.setContent(session.getContent());
+                            csdnHistorySession.setHasReplied(session.getHasReplied() ? 1 : 0);
+                            csdnHistorySession.setMessageUrl("https://i.csdn.net/#/msg/chat/" + username);
+                            this.save(csdnHistorySession);
+                        }
+                }
+            }
+            return sessions;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -65,29 +87,47 @@ public class CsdnMessageServiceImpl implements CsdnMessageService {
     public void dealMessage(List<MessageResponse.MessageData.Sessions> acquireMessage) {
         if (CollectionUtil.isNotEmpty(acquireMessage)) {
             for (MessageResponse.MessageData.Sessions sessions : acquireMessage) {
-                final String username = sessions.getUsername();
-                List<BusinessInfoResponse.ArticleData.Article> blogs10 = csdnArticleInfoService.getArticles10(username);
-                if (CollectionUtil.isNotEmpty(blogs10)) {
-                    blogs10 = blogs10.stream().filter(x -> x.getType().equals(CommonConstant.ARTICLE_TYPE_BLOG)).collect(Collectors.toList());
-                    if (CollectionUtil.isNotEmpty(blogs10)) {
-                        final BusinessInfoResponse.ArticleData.Article article = blogs10.get(0);
-                        final String url = article.getUrl();
-                        final String nickname = sessions.getNickname();
-                        if (!haveRepliedMessage(username, url)) {
-                            //获取最新的一篇文章,进行三连
-                            CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(username);
-                            if (Objects.nonNull(csdnUserInfo)) {
-                                csdnService.singleArticle(csdnUserInfo);
-                                final String title = article.getTitle();
-                                String messageBody = nickname + "大佬最新的文章\n✨" + title + "✨\n" + "\uD83D\uDC4D\uD83C\uDFFB" + url + "\n已三连完成";
-                                this.replyMessage(username, 0, messageBody, "WEB", "10_20285116700–1699412958190–182091", "CSDN-PC");
-                                this.messageRead(username);
-                            }
+                dealMessageByUserName(sessions.getUsername());
+            }
+        }
+    }
+
+    @Override
+    public void dealMessageByUserName(String username) {
+        List<BusinessInfoResponse.ArticleData.Article> blogs10 = csdnArticleInfoService.getArticles10(username);
+        if (CollectionUtil.isNotEmpty(blogs10)) {
+            blogs10 = blogs10.stream().filter(x -> x.getType().equals(CommonConstant.ARTICLE_TYPE_BLOG)).collect(Collectors.toList());
+            if (CollectionUtil.isNotEmpty(blogs10)) {
+                final BusinessInfoResponse.ArticleData.Article article = blogs10.get(0);
+                final String url = article.getUrl();
+                if (!haveRepliedMessage(username, url)) {
+                    //获取最新的一篇文章,进行三连
+                    CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(username);
+                    if (Objects.nonNull(csdnUserInfo)) {
+                        final String nickname = csdnUserInfo.getNickName();
+                        csdnService.singleArticle(csdnUserInfo);
+                        final String title = article.getTitle();
+                        String messageBody = nickname + "大佬最新的文章\n✨" + title + "✨\n" + "\uD83D\uDC4D\uD83C\uDFFB" + url + "\n已三连完成";
+                        this.replyMessage(username, 0, messageBody, "WEB", "10_20285116700–1699412958190–182091", "CSDN-PC");
+                        CsdnHistorySession csdnHistorySession = this.getCsdnHistorySession(username);
+                        if (Objects.nonNull(csdnHistorySession)) {
+                            csdnHistorySession.setHasReplied(1);
+                            this.updateById(csdnHistorySession);
                         }
+                        this.messageRead(username);
                     }
                 }
             }
         }
+    }
+
+    @Override
+    public CsdnHistorySession getCsdnHistorySession(String username) {
+        QueryWrapper<CsdnHistorySession> wrapper = new QueryWrapper<>();
+        wrapper.eq("is_delete", 0);
+        wrapper.eq("user_name", username);
+        CsdnHistorySession csdnHistorySession = this.getOne(wrapper);
+        return csdnHistorySession;
     }
 
     @Override
