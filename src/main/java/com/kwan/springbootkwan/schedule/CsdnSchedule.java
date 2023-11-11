@@ -9,6 +9,7 @@ import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.service.CsdnArticleInfoService;
 import com.kwan.springbootkwan.service.CsdnAutoReplyService;
+import com.kwan.springbootkwan.service.CsdnLikeCollectService;
 import com.kwan.springbootkwan.service.CsdnMessageService;
 import com.kwan.springbootkwan.service.CsdnService;
 import com.kwan.springbootkwan.service.CsdnTripletDayInfoService;
@@ -29,7 +30,6 @@ public class CsdnSchedule {
 
     @Value("${csdn.self_user_name}")
     private String selfUserName;
-
     @Autowired
     private CsdnService csdnService;
     @Autowired
@@ -41,6 +41,8 @@ public class CsdnSchedule {
     @Autowired
     private CsdnArticleInfoService csdnArticleInfoService;
     @Autowired
+    private CsdnLikeCollectService csdnLikeCollectService;
+    @Autowired
     private CsdnTripletDayInfoService csdnTripletDayInfoService;
 
     @ApiOperation(value = "自动三连+自动回复评论", nickname = "自动三连+自动回复评论")
@@ -48,6 +50,7 @@ public class CsdnSchedule {
     public void allTripletAndCommentSelf() {
         log.info("allTripletAndCommentSelf task is running ... ...");
         csdnAutoReplyService.commentSelf();
+        csdnLikeCollectService.dealLikeCollect(csdnLikeCollectService.acquireLikeCollect());
         csdnMessageService.dealMessage(csdnMessageService.acquireMessage());
         log.info("allTripletAndCommentSelf task is finish ... ...");
     }
