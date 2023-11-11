@@ -66,19 +66,30 @@ public class CsdnMessageServiceImpl extends ServiceImpl<CsdnHistorySessionMapper
                     final String username = session.getUsername();
                     final String content = session.getContent();
                     CsdnHistorySession csdnHistorySession = this.getCsdnHistorySession(username);
-                    if (Objects.isNull(csdnHistorySession)) {
-                        csdnHistorySession = new CsdnHistorySession();
-                        csdnHistorySession.setUserName(username);
-                        csdnHistorySession.setNickName(session.getNickname());
-                        csdnHistorySession.setContent(content);
-                        csdnHistorySession.setHasReplied(session.getHasReplied() ? 1 : 0);
-                        csdnHistorySession.setMessageUrl("https://i.csdn.net/#/msg/chat/" + username);
-                        this.save(csdnHistorySession);
-                    } else {
-                        final String contentHistory = csdnHistorySession.getContent();
-                        if (!StringUtils.equals(content, contentHistory)) {
-                            csdnHistorySession.setContent(content);
-                            this.updateById(csdnHistorySession);
+                    List<BusinessInfoResponse.ArticleData.Article> blogs10 = csdnArticleInfoService.getArticles10(username);
+                    if (CollectionUtil.isNotEmpty(blogs10)) {
+                        blogs10 = blogs10.stream().filter(x -> x.getType().equals(CommonConstant.ARTICLE_TYPE_BLOG)).collect(Collectors.toList());
+                        if (CollectionUtil.isNotEmpty(blogs10)) {
+                            final BusinessInfoResponse.ArticleData.Article article = blogs10.get(0);
+                            final String blogUrl = article.getUrl();
+                            final Boolean aBoolean = haveRepliedMessage(username, blogUrl);
+                            if (Objects.isNull(csdnHistorySession)) {
+                                csdnHistorySession = new CsdnHistorySession();
+                                csdnHistorySession.setUserName(username);
+                                csdnHistorySession.setNickName(session.getNickname());
+                                csdnHistorySession.setContent(content);
+                                csdnHistorySession.setHasReplied(aBoolean ? 1 : 0);
+                                csdnHistorySession.setMessageUrl("https://i.csdn.net/#/msg/chat/" + username);
+                                this.save(csdnHistorySession);
+                            } else {
+                                final String contentHistory = csdnHistorySession.getContent();
+                                if (!StringUtils.equals(content, contentHistory)) {
+                                    csdnHistorySession.setContent(content);
+                                    csdnHistorySession.setHasReplied(aBoolean ? 1 : 0);
+                                    this.updateById(csdnHistorySession);
+                                }
+                            }
+
                         }
                     }
                 }
