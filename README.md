@@ -24,6 +24,11 @@
 
 ### 2.更新日志
 
+#### v0.0.2-20231111
+
+- 新增README文档启动说明,方便快速入手;
+- 新增前端其他模块的接口,避免启动前端报错,也方便自己同步代码;
+
 #### v0.0.1-20231110
 
 - 新增私信管理,自动三连私信好友的最新blog;
@@ -126,11 +131,11 @@ docs/apifox.json
 
 ### 8.控制层介绍
 
-- CsdnArticleInfoController.java   文章Blog相关
-- CsdnController.java                 三连相关
-- CsdnMessageController.java     私信相关
-- CsdnTripletDayInfoController.java   每日三连数量监控相关
-- CsdnUserController.java            csdn用户相关
+- CsdnArticleInfoController.java 文章Blog相关
+- CsdnController.java 三连相关
+- CsdnMessageController.java 私信相关
+- CsdnTripletDayInfoController.java 每日三连数量监控相关
+- CsdnUserController.java csdn用户相关
 
 ## 三.数据库配置
 
@@ -150,3 +155,29 @@ docs/apifox.json
 alter table kwan.table add column `xxxx_name` varchar(100) default null COMMENT 'xxx名' after `xxx_name`;
 ```
 
+## 四.启动介绍
+
+### 1.本地启动
+
+- 安装jdk环境,对于不是java开发的同学,需要自己研究下java的环境配置
+- 定位到 AppApplication.java 文件
+- 运行文件
+
+![image-20231111104559655](docs/pic/AppApplication.png)
+
+### 2.jar包运行
+
+- 先打jar包
+- 再运行jar包
+- java -jar csdn-automatic-triplet-0.0.1-SNAPSHOT.jar
+
+![image-20231111104721059](docs/pic/maven.png)
+
+### 3.docker部署
+
+- 使用docker打镜像
+- 然后运行容器,进行部署
+- mvn clean package -P test
+- docker build -t csdn-automatic-triplet :$VERSION .
+
+![image-20231111104805736](docs/pic/Dockerfile.png)
