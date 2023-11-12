@@ -22,7 +22,7 @@ public class Signature_Test_06 {
 //    https://bizapi.csdn.net/community-cloud/v1/new/home/recent?pageNum=1&type=4
     public static JSONObject getAllMyArticle() throws Exception {
         String host = "https://bizapi.csdn.net";
-        String path = "/community-cloud/v1/new/home/recent?pageNum=1&type=8";
+        String path = "/community-cloud/v1/new/home/recent?pageNum=1&type=2";
         String onceKey = GetNonceUtil.onceKey();
         String sign = GetSignatureUtil.sign(path, "get", onceKey);
         OkHttpClient client = new OkHttpClient();
@@ -39,20 +39,15 @@ public class Signature_Test_06 {
                 .addHeader("sec-ch-ua-mobile", "?0")
                 .addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
                 .addHeader("Accept", "application/json, text/plain, */*")
-//                .addHeader("X-Ca-Nonce", "72de9845-fa13-459e-bff0-6546aba71d7b")
-//                .addHeader("X-Ca-Signature", "ZHTljsTqvEXO1OoALAI1PFFUE89LDFzbx25WdcS/nsw=")
-                .addHeader("X-Sdk-Date", "20231112T022331Z")
-//                .addHeader("X-Ca-Key", "203899271")
+                .addHeader("X-Ca-Nonce", "86520cbe-2e44-40c9-ae10-d19cfdf08526")
+                .addHeader("X-Ca-Signature", "HRVCjNq+6T52hz7eF4SDcnlNTJauIMbrF63X31AJ6wI=")
+                .addHeader("X-Ca-Key", "203899271")
                 .addHeader("sec-ch-ua-platform", "\"macOS\"")
                 .addHeader("Sec-Fetch-Site", "same-site")
                 .addHeader("Sec-Fetch-Mode", "cors")
                 .addHeader("Sec-Fetch-Dest", "empty")
                 .addHeader("host", "bizapi.csdn.net")
-
                 .build();
-
-
-
         Response response = client.newCall(request).execute();
         response.header("content-type", "application/json;charset=utf-8");
 //        出现错误可以将此打开获取报错内容
