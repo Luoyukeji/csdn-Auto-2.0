@@ -23,9 +23,13 @@ public enum CollectStatus {
      */
     MISSING_PARAMETER(3, "参数缺失"),
     /**
+     * 收藏夹不存在
+     */
+    FOLDER_NOT_EXIST(4, "收藏夹不存在"),
+    /**
      * 其他错误
      */
-    OTHER_ERRORS(4, "其他错误"),
+    OTHER_ERRORS(8, "其他错误"),
     /**
      * 收藏成功
      */

@@ -205,3 +205,16 @@ Internal error in the mapping processor: java.lang.NullPointerException  	at org
 - docker build -t csdn-automatic-triplet :$VERSION .
 
 ![image-20231111104805736](docs/pic/Dockerfile.png)
+
+### 4.前端访问
+
+前端目前登录做的比较简单
+
+```apl
+#账号
+admin
+
+#密码
+666666
+```
+

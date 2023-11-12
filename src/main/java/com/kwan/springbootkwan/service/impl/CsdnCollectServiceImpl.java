@@ -13,6 +13,7 @@ import com.kwan.springbootkwan.entity.csdn.IsCollectResponse;
 import com.kwan.springbootkwan.enums.CollectStatus;
 import com.kwan.springbootkwan.service.CsdnCollectService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -98,6 +99,7 @@ public class CsdnCollectServiceImpl implements CsdnCollectService {
             e.printStackTrace();
         }
         final int code = collectResponse.code;
+        final String msg = collectResponse.getMsg();
         if (code == 200) {
             log.info("文章{}收藏成功", articleId);
             csdnUserInfo.setCollectStatus(CollectStatus.COLLECT_SUCCESSFUL.getCode());
@@ -107,10 +109,14 @@ public class CsdnCollectServiceImpl implements CsdnCollectService {
             log.info("收藏文章{}参数缺失", articleId);
             csdnUserInfo.setCollectStatus(CollectStatus.MISSING_PARAMETER.getCode());
             csdnTripletDayInfo.setCollectStatus(CollectStatus.MISSING_PARAMETER.getCode());
-        } else if (code == 400) {
+        } else if (code == 400 && StringUtils.equals(msg, "今日收藏次数已达上限!")) {
             log.info("今日收藏次数已达上限!");
             csdnUserInfo.setCollectStatus(CollectStatus.COLLECT_IS_FULL.getCode());
             csdnTripletDayInfo.setCollectStatus(CollectStatus.COLLECT_IS_FULL.getCode());
+        } else if (code == 421 && StringUtils.equals(msg, "收藏夹不存在")) {
+            log.info("收藏夹不存在");
+            csdnUserInfo.setCollectStatus(CollectStatus.FOLDER_NOT_EXIST.getCode());
+            csdnTripletDayInfo.setCollectStatus(CollectStatus.FOLDER_NOT_EXIST.getCode());
         } else {
             log.info("其他收藏错误");
             csdnUserInfo.setCollectStatus(CollectStatus.OTHER_ERRORS.getCode());
