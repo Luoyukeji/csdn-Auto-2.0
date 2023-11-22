@@ -3,9 +3,6 @@ package com.kwan.springbootkwan.entity.pic;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.lang.Integer;
-import java.lang.Object;
-import java.lang.String;
 import java.util.List;
 
 

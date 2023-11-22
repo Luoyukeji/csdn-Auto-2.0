@@ -125,7 +125,7 @@ public class CsdnMessageServiceImpl extends ServiceImpl<CsdnHistorySessionMapper
                         final String nickname = csdnUserInfo.getNickName();
                         csdnService.singleArticle(csdnUserInfo);
                         final String title = article.getTitle();
-                        String messageBody = nickname + "大佬最新的文章\n✨" + title + "✨\n" + "\uD83D\uDC4D\uD83C\uDFFB" + url + "\n已三连完成";
+                        String messageBody = nickname + "大佬最新的文章\n✨" + title + "✨\n" + "\uD83D\uDC4D\uD83C\uDFFB" + url + "\n已三连完成，欢迎大佬回访。👏🏻";
                         this.replyMessage(username, 0, messageBody, "WEB", "10_20285116700–1699412958190–182091", "CSDN-PC");
                         CsdnHistorySession csdnHistorySession = this.getCsdnHistorySession(username);
                         if (Objects.nonNull(csdnHistorySession)) {

@@ -12,6 +12,7 @@ import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
+import com.kwan.springbootkwan.entity.csdn.DeleteQuery;
 import com.kwan.springbootkwan.entity.csdn.ScoreResponse;
 import com.kwan.springbootkwan.enums.CollectStatus;
 import com.kwan.springbootkwan.enums.CommentStatus;
@@ -21,6 +22,8 @@ import com.kwan.springbootkwan.service.CsdnArticleInfoService;
 import com.kwan.springbootkwan.service.CsdnCollectService;
 import com.kwan.springbootkwan.service.CsdnCommentService;
 import com.kwan.springbootkwan.service.CsdnLikeService;
+import com.kwan.springbootkwan.utils.GetNonceUtil;
+import com.kwan.springbootkwan.utils.GetSignatureUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -35,7 +38,9 @@ import javax.annotation.Resource;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,6 +51,8 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
     private String csdnCookie;
     @Value("${csdn.self_user_name}")
     private String selfUserName;
+    @Value("${csdn.self_user_nick_name}")
+    private String selfUserNickName;
     @Value("${csdn.url.user_article_url}")
     private String url;
     @Value("${csdn.url.get_article_score_url}")
@@ -113,29 +120,34 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
 
     @Override
     public List<BusinessInfoResponse.ArticleData.Article> getArticles100(String username) {
-        HttpResponse response = HttpUtil.createGet(url)
-                .header("Cookie", csdnCookie)
-                .form("page", 1)
-                .form("size", 100)
-                .form("businessType", "lately")
-                .form("noMore", false)
-                .form("username", username)
-                .execute();
-        final String body = response.body();
-        ObjectMapper objectMapper = new ObjectMapper();
-        BusinessInfoResponse businessInfoResponse;
-        List<BusinessInfoResponse.ArticleData.Article> list = null;
-        try {
-            businessInfoResponse = objectMapper.readValue(body, BusinessInfoResponse.class);
-            final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
-            list = data.getList();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        List<BusinessInfoResponse.ArticleData.Article> resp = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            HttpResponse response = HttpUtil.createGet(url)
+                    .header("Cookie", csdnCookie)
+                    .form("page", i)
+                    .form("size", 100)
+                    .form("businessType", "lately")
+                    .form("noMore", false)
+                    .form("username", username)
+                    .execute();
+            final String body = response.body();
+            ObjectMapper objectMapper = new ObjectMapper();
+            BusinessInfoResponse businessInfoResponse;
+            try {
+                businessInfoResponse = objectMapper.readValue(body, BusinessInfoResponse.class);
+                final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
+                final List<BusinessInfoResponse.ArticleData.Article> list = data.getList();
+                if (CollectionUtil.isNotEmpty(list)) {
+                    resp.addAll(list);
+                    if (resp.size() >= 200) {
+                        return resp;
+                    }
+                }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
         }
-        if (CollectionUtil.isEmpty(list)) {
-            return null;
-        }
-        return list;
+        return resp;
     }
 
     @Override
@@ -257,6 +269,139 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
                     }
                 }
             }
+        }
+    }
+
+    @Override
+    public Integer getViewCount(String userName, String articleId) {
+        String url = "https://blog.csdn.net/" + userName + "/article/details/" + articleId;
+        HttpResponse response = HttpUtil.createGet(url)
+                .header("Cookie", csdnCookie)
+                .form("articleId", articleId)
+                .execute();
+        final String body = response.body();
+        final int index = body.indexOf("阅读量");
+        String str = body.substring(index, index + 7);
+        for (int i = str.length() - 1; i >= 0; i--) {
+            char lastChar = str.charAt(i);
+            if (lastChar == 'k') {
+                // 字符不是数字，舍去最后一位字符
+                str = str.substring(3, i);
+                return new BigDecimal(str).multiply(new BigDecimal(1000)).intValue();
+            } else if (lastChar == 'w') {
+                // 字符不是数字，舍去最后一位字符
+                str = str.substring(3, i);
+                return new BigDecimal(str).multiply(new BigDecimal(10000)).intValue();
+            } else if (Character.isDigit(lastChar)) {
+                // 字符不是数字，舍去最后一位字符
+                return Integer.valueOf(str.substring(3, i + 1));
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public void syncMyBlog() {
+        //获取本人10页的博客信息
+        for (int i = 1; i < 11; i++) {
+            HttpResponse response = HttpUtil.createGet(url)
+                    .header("Cookie", csdnCookie)
+                    .form("page", i)
+                    .form("size", 100)
+                    .form("businessType", "blog")
+                    .form("noMore", false)
+                    .form("username", selfUserName)
+                    .execute();
+            final String body = response.body();
+            ObjectMapper objectMapper = new ObjectMapper();
+            BusinessInfoResponse businessInfoResponse;
+            try {
+                businessInfoResponse = objectMapper.readValue(body, BusinessInfoResponse.class);
+                final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
+                if (Objects.nonNull(data)) {
+                    List<BusinessInfoResponse.ArticleData.Article> list = data.getList();
+                    if (CollectionUtil.isNotEmpty(list)) {
+                        for (BusinessInfoResponse.ArticleData.Article article : list) {
+                            final String articleId = article.getArticleId();
+                            CsdnArticleInfo csdnArticleInfo = this.getArticleByArticleId(articleId);
+                            if (Objects.isNull(csdnArticleInfo)) {
+                                csdnArticleInfo = new CsdnArticleInfo();
+                                csdnArticleInfo.setArticleId(articleId);
+                                final String url = article.getUrl();
+                                csdnArticleInfo.setArticleUrl(url);
+                                csdnArticleInfo.setArticleScore(getArticleScore(url));
+                                csdnArticleInfo.setArticleTitle(article.getTitle());
+                                csdnArticleInfo.setArticleDescription(article.getDescription());
+                                csdnArticleInfo.setUserName(selfUserName);
+                                csdnArticleInfo.setNickName(selfUserNickName);
+                                csdnArticleInfo.setLikeStatus(9);
+                                csdnArticleInfo.setCollectStatus(9);
+                                csdnArticleInfo.setCommentStatus(9);
+                                csdnArticleInfo.setIsMyself(1);
+                                this.save(csdnArticleInfo);
+                            }
+                        }
+                    }
+                }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void deleteLowBlog() {
+        try {
+            QueryWrapper<CsdnArticleInfo> wrapper = new QueryWrapper<>();
+            wrapper.eq("is_delete", 0);
+            wrapper.le("article_score", 79);
+            wrapper.eq("is_myself", 1);
+            final List<CsdnArticleInfo> list = list(wrapper);
+            if (CollectionUtil.isNotEmpty(list)) {
+                for (CsdnArticleInfo csdnArticleInfo : list) {
+                    final String articleId = csdnArticleInfo.getArticleId();
+                    String host = "https://bizapi.csdn.net";
+                    String path = "/blog/phoenix/console/v1/article/del";
+                    final String xcakey = "203803574";
+                    final String ekey = "9znpamsyl2c7cdrr9sas0le9vbc3r6ba";
+                    String onceKey = GetNonceUtil.onceKey();
+                    String signature = GetSignatureUtil.sign(path, "post", onceKey, xcakey, ekey);
+                    DeleteQuery deleteQuery = new DeleteQuery();
+                    deleteQuery.setArticleId(articleId);
+                    deleteQuery.setDeep(false);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    String jsonCollectInfo = objectMapper.writeValueAsString(deleteQuery);
+                    HttpResponse response = HttpUtil.createPost(host + path)
+                            .header("Cookie", "uuid_tt_dd=10_20285116700-1699412958190-182091; c_adb=1; UN=qyj19920704; p_uid=U010000; management_ques=1699426171980; historyList-new=%5B%5D; dp_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MjA4Nzc0LCJleHAiOjE3MDAxMTg5NjEsImlhdCI6MTY5OTUxNDE2MSwidXNlcm5hbWUiOiJxeWoxOTkyMDcwNCJ9.aExmuc4tgKqtI4Pf6p2jMluYXV4vwUqiuK6As8_FF9I; blog_details_nps=1699613550551; blog_details_recommend_nps=1699751971622; c_ins_prid=-; c_ins_rid=1699884736255_252401; c_ins_fref=https://blog.csdn.net/nav/java; c_ins_fpage=/?utm_source=260232576&spm=1001.2100.3001.8290; c_ins_um=-; ins_first_time=1699884741141; hide_login=1; loginbox_strategy=%7B%22taskId%22%3A317%2C%22abCheckTime%22%3A1699886580644%2C%22version%22%3A%22ExpA%22%2C%22nickName%22%3A%22%E6%AA%80%E8%B6%8A%E5%89%91%E6%8C%87%E5%A4%A7%E5%8E%82%22%7D; UserName=qyj19920704; UserInfo=b98083c8819e4e53b63b0a57853c25a6; UserToken=b98083c8819e4e53b63b0a57853c25a6; UserNick=%E6%AA%80%E8%B6%8A%E5%89%91%E6%8C%87%E5%A4%A7%E5%8E%82; AU=769; BT=1699887483429; Hm_up_6bcd52f51e9b3dce32bec4a3997715ac=%7B%22islogin%22%3A%7B%22value%22%3A%221%22%2C%22scope%22%3A1%7D%2C%22isonline%22%3A%7B%22value%22%3A%221%22%2C%22scope%22%3A1%7D%2C%22isvip%22%3A%7B%22value%22%3A%220%22%2C%22scope%22%3A1%7D%2C%22uid_%22%3A%7B%22value%22%3A%22qyj19920704%22%2C%22scope%22%3A1%7D%7D; c_segment=11; Hm_lvt_6bcd52f51e9b3dce32bec4a3997715ac=1699765069,1699856983,1699881521,1699895347; dc_sid=1cbfec7af2f0d0a6026dd26ad15838f9; is_advert=1; SidecHatdocDescBoxNum=true; fe_request_id=1699943329457_0936_2289941; creative_btn_mp=3; c_utm_source=wwwtab; c_hasSub=true; qyj19920704comment_new=1699959325478; c_dl_prid=1699949672197_794895; c_dl_rid=1699962909502_780632; c_dl_fref=https://blog.csdn.net/MrZhangTS/article/details/124969234; c_dl_fpage=/download/yhsbzl/22403877; c_dl_um=distribute.pc_relevant.none-task-blog-2%7Edefault%7Ebaidujs_baidulandingword%7Edefault-1-124969234-blog-128776276.235%5Ev38%5Epc_relevant_anti_vip_base; SESSION=9633036a-58e7-4068-b7e9-dc2bafe27a0a; dc_session_id=11_1699967846228.286064; c_pref=default; c_ref=default; c_first_ref=43.139.90.182; log_Id_pv=182; log_Id_view=2428; c_first_page=https%3A//blog.csdn.net/m0_46376834/article/details/134366635; c_dsid=11_1699968481254.621155; c_page_id=default; ssxmod_itna=QqRxnDBQKWuDyQDzOD2YLDkYlQRiWiDYwnWPDsaQbDSxGKidDqxBmWC4DQbwSwQnhBxfGvYETpXmai++0KWDr2M4GIDeKG2DmeDyDi5GRD0IeebDeW=D5xGoDPxDeDAmKDCyodKDdR2Lv7ROaPRxDWDY5DXg5DN1v7zZICKDGdaDi3A0I+340OMoyH8aO1DU5IZ7GWKYxNwGKqfQiPYCGtqmrL8GDqOBGtB+2iYm24SjLL7BfhHlfDD=; ssxmod_itna2=QqRxnDBQKWuDyQDzOD2YLDkYlQRiWiDYwnDikvYwDlP/Dj+2qqlSo07D004jKG7lnhiHKxD=; creativeSetApiNew=%7B%22toolbarImg%22%3A%22https%3A//img-home.csdnimg.cn/images/20230921102607.png%22%2C%22publishSuccessImg%22%3A%22https%3A//img-home.csdnimg.cn/images/20230920034826.png%22%2C%22articleNum%22%3A595%2C%22type%22%3A2%2C%22oldUser%22%3Atrue%2C%22useSeven%22%3Afalse%2C%22oldFullVersion%22%3Atrue%2C%22userName%22%3A%22qyj19920704%22%7D; Hm_lpvt_6bcd52f51e9b3dce32bec4a3997715ac=1699968708; log_Id_click=22; dc_tos=s4489e")
+                            .header("Content-Type", "application/json;")
+                            .header("x-ca-Key", "203803574")
+                            .header("x-ca-nonce", onceKey)
+                            .header("x-ca-signature", signature)
+                            .header("x-ca-signature-headers", "x-ca-key,x-ca-nonce")
+                            .header("host", "bizapi.csdn.net")
+                            .header("connection", "keep-alive")
+                            .header("pragma", "no-cache")
+                            .header("cache-control", "no-cache")
+                            .header("sec-ch-ua", "\"Google Chrome\";v=\"119\", \"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"")
+                            .header("sec-ch-ua-mobile", "?0")
+                            .header("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
+                            .header("accept", "application/json, text/plain, */*")
+                            .header("sec-ch-ua-platform", "macOS")
+                            .header("origin", "https://mp.csdn.net")
+                            .header("sec-fetch-site", "same-site")
+                            .header("sec-fetch-mode", "cors")
+                            .header("sec-fetch-dest", "empty")
+                            .header("referer", "https://mp.csdn.net/mp_blog/manage/article?spm=1011.2419.3001.5298")
+                            .header("accept-encoding", "gzip, deflate, br")
+                            .header("accept-language", "zh-CN,zh;q=0.9,en;q=0.8")
+                            .body(jsonCollectInfo)
+                            .execute();
+                    csdnArticleInfo.setIsDelete(1);
+                    this.updateById(csdnArticleInfo);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

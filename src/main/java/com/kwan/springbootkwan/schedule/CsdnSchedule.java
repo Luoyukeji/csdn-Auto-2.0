@@ -46,7 +46,7 @@ public class CsdnSchedule {
     private CsdnTripletDayInfoService csdnTripletDayInfoService;
 
     @ApiOperation(value = "自动三连+自动回复评论", nickname = "自动三连+自动回复评论")
-    @Scheduled(cron = "0 0/30 9,10,12,14,16,18,20 * * ?")
+    @Scheduled(cron = "0 0 6,12,23 * * ?")
     public void allTripletAndCommentSelf() {
         log.info("allTripletAndCommentSelf task is running ... ...");
         csdnAutoReplyService.commentSelf();
@@ -56,7 +56,7 @@ public class CsdnSchedule {
     }
 
     @ApiOperation(value = "检查用户是否发布新的文章", nickname = "检查用户是否发布新的文章")
-    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "0 0/30 8,11,15,21,23 * * ?")
     public void resetAllCurrentStatus() {
         log.info("resetAllCurrentStatus task is running ... ...");
         //用户可能有新的文章,更新用户的状态
@@ -112,7 +112,7 @@ public class CsdnSchedule {
             "设置在下午执行主要是为了把每天仅有的48个评论留给评论自己的老铁和私信自己的老铁," +
             "当然这里的私信人也必须是白名单的人,默认人是不三连的)"
             , nickname = "自动评论(因为有一分钟之内只能发3条的限制,所以这里指定时间执行)")
-    @Scheduled(cron = "0 0/2 15,16,17,20 * * ?")
+    @Scheduled(cron = "0 0/2 06,21,23 * * ?")
     public void frequentlyComment() {
         log.info("frequentlyComment task is running ... ...");
         final List<CsdnUserInfo> csdnUserInfos = csdnUserInfoService.waitForCommentsUser();

@@ -7,9 +7,8 @@ DATABASE kwan;
 --切换数据库
 USE
 kwan;
-
 -- kwan.algorithmic_problem definition
-DROP TABLE IF EXISTS `algorithmic_problem1`;
+DROP TABLE IF EXISTS `algorithmic_problem`;
 CREATE TABLE `algorithmic_problem`
 (
     `id`                   int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -78,6 +77,23 @@ CREATE TABLE `csdn_article_info`
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='csdn文章信息';
 
 
+-- kwan.csdn_follow_fans_info definition
+DROP TABLE IF EXISTS `csdn_follow_fans_info`;
+CREATE TABLE `csdn_follow_fans_info`
+(
+    `id`            int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `user_name`     varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '用户名',
+    `nick_name`     varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '用户昵称',
+    `blog_url`      varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '博客地址',
+    `relation_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '与我的关系',
+    `create_time`   timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`   timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `is_delete`     tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除,0未删除,1已删除',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY             `csdn_red_package_order_no_IDX` (`user_name`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='csdn关注与粉丝信息';
+
+
 -- kwan.csdn_history_session definition
 DROP TABLE IF EXISTS `csdn_history_session`;
 CREATE TABLE `csdn_history_session`
@@ -102,10 +118,11 @@ DROP TABLE IF EXISTS `csdn_triplet_day_info`;
 CREATE TABLE `csdn_triplet_day_info`
 (
     `id`             int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
-    `triplet_date`   date         DEFAULT NULL COMMENT '三连日期',
-    `like_num`       int NOT NULL DEFAULT '0' COMMENT '点赞数量',
-    `collect_num`    int NOT NULL DEFAULT '0' COMMENT '收藏数量',
-    `comment_num`    int NOT NULL DEFAULT '0' COMMENT '评论数量',
+    `triplet_date`   date                                                         DEFAULT NULL COMMENT '三连日期',
+    `week_info`      varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '星期',
+    `like_num`       int NOT NULL                                                 DEFAULT '0' COMMENT '点赞数量',
+    `collect_num`    int NOT NULL                                                 DEFAULT '0' COMMENT '收藏数量',
+    `comment_num`    int NOT NULL                                                 DEFAULT '0' COMMENT '评论数量',
     `like_status`    tinyint(1) NOT NULL DEFAULT '9' COMMENT '点赞状态:\n0:未处理;\n1:已经点过赞;\n2:点赞已满;\n3:取消点赞;\n9:点赞成功;',
     `collect_status` tinyint(1) NOT NULL DEFAULT '9' COMMENT '收藏状态:\n0:未处理;\n1:已经收藏过;\n2:收藏已满;\n3:参数缺失;\n9:收藏成功;',
     `comment_status` tinyint(1) NOT NULL DEFAULT '9' COMMENT '评论状态:\n0:未处理;\n1:已经评论过;\n2:评论已满;\n3:禁言;\n4:评论太快;\n5:评论已经到了49条;\n8:其他错误;\n9:评论成功;',
@@ -192,7 +209,7 @@ CREATE TABLE `pic_info`
     `id`          int unsigned NOT NULL AUTO_INCREMENT,
     `pic_name`    varchar(100) NOT NULL COMMENT '图片名称',
     `pic_url`     varchar(255) NOT NULL COMMENT '图片地址',
-    `type`        tinyint(1) NOT NULL DEFAULT '0' COMMENT '图片类型,0:表示宝宝图片,1:学习图片,2:风景,3:美女,99:其他',
+    `type`        tinyint(1) NOT NULL DEFAULT '0' COMMENT '图片类型,0:宝宝,1:学习,2:风景,3:美女,4:猫咪,5:素材;6:动漫;99:其他',
     `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
     `is_delete`   tinyint(1) NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`) USING BTREE

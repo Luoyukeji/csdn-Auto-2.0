@@ -12,6 +12,7 @@ import com.kwan.springbootkwan.service.CsdnUserInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -54,6 +56,14 @@ public class CsdnController {
         return Result.ok("自刷流量完成");
     }
 
+    @ApiOperation(value = "给指定文章刷流量", nickname = "给指定文章刷流量")
+    @GetMapping("/autoAddViewByUrl")
+    public Result autoAddViewByUrl(@RequestParam("url") String url) {
+        if (StringUtils.isNotEmpty(url)) {
+            csdnService.autoAddViewByUrl(url);
+        }
+        return Result.ok("给指定文章刷流量完成");
+    }
 
     @ApiOperation(value = "单人三连", nickname = "单人三连")
     @GetMapping("/singleTriplet")

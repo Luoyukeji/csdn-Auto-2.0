@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -107,37 +109,49 @@ public class CsdnArticleInfoController {
             List<BusinessInfoResponse.ArticleData.Article> articles = this.csdnArticleInfoService.getArticles10(userName);
             articles = articles.stream().filter(x -> x.getType().equals(CommonConstant.ARTICLE_TYPE_BLOG)).collect(Collectors.toList());
             for (BusinessInfoResponse.ArticleData.Article article : articles) {
-                if (articleId.equals(article.getArticleId().toString())) {
-                    //首先查询用户
-                    CsdnUserInfoQuery addUserInfo = new CsdnUserInfoQuery();
-                    addUserInfo.setUserName(userName);
-                    addUserInfo.setAddType(0);
-                    csdnUserInfoService.add(addUserInfo);
-                    CsdnArticleInfo csdnArticleInfo = this.csdnArticleInfoService.getArticleByArticleId(articleId);
-                    if (csdnArticleInfo == null) {
-                        csdnArticleInfo = new CsdnArticleInfo();
-                        final String url = article.getUrl();
-                        csdnArticleInfo.setArticleId(articleId);
-                        csdnArticleInfo.setUserName(userName);
-                        csdnArticleInfo.setArticleTitle(article.getTitle());
-                        csdnArticleInfo.setArticleDescription(article.getDescription());
-                        csdnArticleInfo.setArticleUrl(url);
-                        csdnArticleInfo.setNickName(addUserInfo.getNickName());
-                        if (StringUtils.equals(selfUserName, userName)) {
-                            csdnArticleInfo.setIsMyself(1);
+                final String editUrl = article.getEditUrl();
+                // 定义正则表达式
+                String pattern = "articleId=(\\d+)";
+                Pattern r = Pattern.compile(pattern);
+                // 创建匹配器
+                Matcher m = r.matcher(editUrl);
+                // 查找匹配
+                if (m.find()) {
+                    // 获取匹配到的值
+                    String articleIdInfo = m.group(1);
+                    if (articleId.equals(articleIdInfo)) {
+                        //首先查询用户
+                        CsdnUserInfoQuery addUserInfo = new CsdnUserInfoQuery();
+                        addUserInfo.setUserName(userName);
+                        addUserInfo.setAddType(0);
+                        csdnUserInfoService.add(addUserInfo);
+                        CsdnArticleInfo csdnArticleInfo = this.csdnArticleInfoService.getArticleByArticleId(articleId);
+                        if (csdnArticleInfo == null) {
+                            csdnArticleInfo = new CsdnArticleInfo();
+                            final String url = article.getUrl();
+                            csdnArticleInfo.setArticleId(articleId);
+                            csdnArticleInfo.setUserName(userName);
+                            csdnArticleInfo.setArticleTitle(article.getTitle());
+                            csdnArticleInfo.setArticleDescription(article.getDescription());
+                            csdnArticleInfo.setArticleUrl(url);
+                            csdnArticleInfo.setNickName(addUserInfo.getNickName());
+                            if (StringUtils.equals(selfUserName, userName)) {
+                                csdnArticleInfo.setIsMyself(1);
+                            }
+                            //查询质量分数
+                            csdnArticleInfo.setArticleScore(csdnArticleInfoService.getScore(url));
+                            this.csdnArticleInfoService.saveArticle(csdnArticleInfo);
                         }
-                        //查询质量分数
-                        csdnArticleInfo.setArticleScore(csdnArticleInfoService.getScore(url));
-                        this.csdnArticleInfoService.saveArticle(csdnArticleInfo);
+                        break;
                     }
-                    break;
                 }
+
             }
         }
         return Result.ok();
     }
 
-    @ApiOperation(value = "更新用户", nickname = "更新用户")
+    @ApiOperation(value = "更新文章", nickname = "更新文章")
     @PostMapping("/update")
     public Result update(@RequestBody CsdnArticleInfoQuery query) {
         CsdnArticleInfo csdnUserInfo = new CsdnArticleInfo();
@@ -149,7 +163,7 @@ public class CsdnArticleInfoController {
         return Result.ok(this.csdnArticleInfoService.updateById(csdnUserInfo));
     }
 
-    @ApiOperation(value = "删除用户", nickname = "删除用户")
+    @ApiOperation(value = "删除文章", nickname = "删除文章")
     @GetMapping("/delete")
     public Result delete(@RequestParam("id") Integer id) {
         CsdnArticleInfo csdnArticleInfo = new CsdnArticleInfo();
@@ -230,4 +244,27 @@ public class CsdnArticleInfoController {
         }
         return Result.ok("修正文章的点赞评论状态完成");
     }
+
+
+    @ApiOperation(value = "查看某一文章的阅读量", nickname = "查看某一文章的阅读量")
+    @GetMapping("/getViewCount")
+    public Result getViewCount(@RequestParam("userName") String userName, @RequestParam("articleId") String articleId) {
+        return Result.ok(this.csdnArticleInfoService.getViewCount(userName, articleId));
+    }
+
+    @ApiOperation(value = "同步本人博客到表中", nickname = "同步本人博客到表中")
+    @GetMapping("/syncMyBlog")
+    public Result syncMyBlog() {
+        this.csdnArticleInfoService.syncMyBlog();
+        return Result.ok("同步本人博客到表中成功");
+    }
+
+
+    @ApiOperation(value = "删除低分文章", nickname = "删除低分文章")
+    @GetMapping("/deletaLowBlog")
+    public Result deletaLowBlog() {
+        this.csdnArticleInfoService.deleteLowBlog();
+        return Result.ok("删除低分文章成功");
+    }
+
 }

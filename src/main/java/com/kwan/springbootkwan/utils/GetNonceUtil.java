@@ -4,6 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+
+/**
+ * Nonce生成工具类
+ *
+ * @author : qinyingjie
+ * @version : 2.2.0
+ * @date : 2023/11/22 13:52
+ */
 public class GetNonceUtil {
     private static List<String> chats = new ArrayList<>();
 
@@ -19,6 +27,11 @@ public class GetNonceUtil {
         }
     }
 
+    /**
+     * 获取一次性访问key
+     *
+     * @return
+     */
     public static String onceKey() {
         List<String> strs = new ArrayList<>();
         Random rd = new Random();
@@ -26,23 +39,5 @@ public class GetNonceUtil {
             strs.add(chats.get(rd.nextInt(chats.size())));
         }
         return String.format("%s%s%s%s%s%s%s%s-%s%s%s%s-4%s%s%s-9%s%s%s-%s%s%s%s%s%s%s%s%s%s%s%s", strs.toArray());
-    }
-    public static String generateUUID() {
-        String template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-        StringBuilder uuid = new StringBuilder(template.length());
-        Random random = new Random();
-        for (int i = 0; i < template.length(); i++) {
-            char c = template.charAt(i);
-            if (c == 'x') {
-                int t = random.nextInt(16);
-                uuid.append(Integer.toHexString(t));
-            } else if (c == 'y') {
-                int t = random.nextInt(4) | 8;
-                uuid.append(Integer.toHexString(t));
-            } else {
-                uuid.append(c);
-            }
-        }
-        return uuid.toString();
     }
 }

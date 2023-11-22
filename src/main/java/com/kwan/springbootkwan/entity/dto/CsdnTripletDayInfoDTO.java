@@ -21,6 +21,8 @@ public class CsdnTripletDayInfoDTO extends Model<CsdnTripletDayInfoDTO> {
     @ApiModelProperty("三连日期")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date tripletDate;
+    @ApiModelProperty("星期")
+    private String weekInfo;
     @ApiModelProperty("点赞数量")
     private Integer likeNum;
     @ApiModelProperty("收藏数量")
@@ -33,6 +35,7 @@ public class CsdnTripletDayInfoDTO extends Model<CsdnTripletDayInfoDTO> {
     private Integer collectStatus;
     @ApiModelProperty("评论状态")
     private Integer commentStatus;
+
     @ApiModelProperty("创建时间")
     private Date createTime;
     @ApiModelProperty("更新时间")

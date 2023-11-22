@@ -38,6 +38,12 @@ public interface CsdnService {
     /**
      * 自刷流量
      */
-    void autoAddView(List<BusinessInfoResponse.ArticleData.Article> articles );
+    void autoAddView(List<BusinessInfoResponse.ArticleData.Article> articles);
 
+    /**
+     * 根据url刷流量
+     *
+     * @param url
+     */
+    void autoAddViewByUrl(String url);
 }

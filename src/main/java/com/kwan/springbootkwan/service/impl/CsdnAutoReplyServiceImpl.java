@@ -89,7 +89,7 @@ public class CsdnAutoReplyServiceImpl implements CsdnAutoReplyService {
                                         int start = -1;
                                         int end = selfReply.length;
                                         int temp_count = (int) (Math.floor(Math.random() * (start - end + 1)) + end);
-                                        CommentResponse reply = csdnCommentService.dealComment(articleId, selfReply[temp_count], commentId);
+                                        CommentResponse reply = csdnCommentService.dealComment(articleId, "感谢" + nickName + "大佬支持！" + selfReply[temp_count], commentId);
                                         log.info(reply.toString());
                                     }
                                     //三连此评论人,不需要回复的时候,也要去三连别人

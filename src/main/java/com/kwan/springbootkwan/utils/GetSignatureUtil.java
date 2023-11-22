@@ -5,12 +5,18 @@ import org.apache.commons.codec.binary.Base64;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+
+/**
+ * Signature生成工具类
+ *
+ * @author : qinyingjie
+ * @version : 2.2.0
+ * @date : 2023/11/22 13:52
+ */
 public class GetSignatureUtil {
 
-    public static String sign(String fullUrl, String method, String onceKey) throws Exception {
-        final String ekey = "9znpamsyl2c7cdrr9sas0le9vbc3r6ba";
-        final String xcakey = "203803574";
 
+    public static String sign(String fullUrl, String method, String onceKey, String xcakey, String ekey) throws Exception {
         String[] wholdUrl = fullUrl.split("\\?");
         String url, params = "";
         if ("get".equals(method)) {
@@ -20,7 +26,7 @@ public class GetSignatureUtil {
             url = wholdUrl[0];
         }
         String _url = url + (!"".equals(params) ? "?" + params : "");
-        String to_enc = "";
+        String to_enc;
         if ("get".equals(method)) {
             to_enc = String.format("GET\napplication/json, text/plain, */*\n\n\n\nx-ca-key:%s\nx-ca-nonce:%s\n%s", xcakey, onceKey, _url);
         } else {

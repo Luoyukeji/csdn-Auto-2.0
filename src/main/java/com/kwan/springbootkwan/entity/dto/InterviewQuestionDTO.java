@@ -34,7 +34,7 @@ public class InterviewQuestionDTO extends Model<InterviewQuestionDTO> {
 
     @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     public interface Converter extends FromConverter<InterviewQuestionDTO, InterviewQuestion> {
-        InterviewQuestionDTO.Converter INSTANCE = Mappers.getMapper(InterviewQuestionDTO.Converter.class);
+        Converter INSTANCE = Mappers.getMapper(Converter.class);
     }
 }
 

@@ -6,6 +6,7 @@ server:
     mime-types:
       - text/html
       - application/json
+
 #兼容swagger配置
 spring:
   # mysql
@@ -15,6 +16,7 @@ spring:
     username: root
     password: xxxx
 
+#csdn相关的配置
 csdn:
   num_of_articles_per_person: 1  #每人文章个数
   self_user_name: "xxxxx"  #自己的用户id

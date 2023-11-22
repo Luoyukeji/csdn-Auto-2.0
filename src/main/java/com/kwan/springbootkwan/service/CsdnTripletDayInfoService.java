@@ -19,5 +19,10 @@ public interface CsdnTripletDayInfoService extends IService<CsdnTripletDayInfo> 
      */
     CsdnTripletDayInfo todayInfo();
 
+    /**
+     * 重置三连管理的星期字段
+     */
+    void resetWeekInfo();
+
 }
 

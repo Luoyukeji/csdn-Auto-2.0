@@ -42,7 +42,7 @@
     </springProfile>
 
     <!--    如果是本地环境,则设置控制台打印-->
-    <springProfile name="test">
+    <springProfile name="test,uat">
         <logger name="com.kwan.springbootkwan.mapper" level="DEBUG" additivity="false">
             <appender-ref ref="STDOUT"/>
         </logger>

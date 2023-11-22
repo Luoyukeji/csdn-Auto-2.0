@@ -36,6 +36,6 @@ public class AphorismPoetryDTO extends Model<AphorismPoetryDTO> {
 
     @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     public interface Converter extends FromConverter<AphorismPoetryDTO, AphorismPoetry> {
-        AphorismPoetryDTO.Converter INSTANCE = Mappers.getMapper(AphorismPoetryDTO.Converter.class);
+        Converter INSTANCE = Mappers.getMapper(Converter.class);
     }
 }

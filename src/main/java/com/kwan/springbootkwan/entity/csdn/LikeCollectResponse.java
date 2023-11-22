@@ -25,6 +25,8 @@ public class LikeCollectResponse {
             public Integer status;
             public String username;
             public ContentInfo content;
+            public Object viewTime;
+            public Object createTime;
 
             @Data
             public static class ContentInfo {

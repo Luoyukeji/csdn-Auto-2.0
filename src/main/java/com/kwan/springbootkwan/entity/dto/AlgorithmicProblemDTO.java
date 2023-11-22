@@ -3,6 +3,7 @@ package com.kwan.springbootkwan.entity.dto;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.kwan.springbootkwan.entity.AlgorithmicProblem;
 import com.kwan.springbootkwan.mapstruct.FromConverter;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -10,14 +11,9 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.Date;
 
-/**
- * 面试题(InterviewQuestion)表实体类
- *
- * @author makejava
- * @since 2023-09-08 16:31:53
- */
+
 @Data
-@SuppressWarnings("serial")
+@ApiModel("面试题DTO")
 public class AlgorithmicProblemDTO extends Model<AlgorithmicProblemDTO> {
     /**
      * 主键id
@@ -58,6 +54,6 @@ public class AlgorithmicProblemDTO extends Model<AlgorithmicProblemDTO> {
 
     @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     public interface Converter extends FromConverter<AlgorithmicProblemDTO, AlgorithmicProblem> {
-        AlgorithmicProblemDTO.Converter INSTANCE = Mappers.getMapper(AlgorithmicProblemDTO.Converter.class);
+        Converter INSTANCE = Mappers.getMapper(Converter.class);
     }
 }

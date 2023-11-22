@@ -18,6 +18,8 @@ public class CsdnTripletDayInfo extends Model<CsdnTripletDayInfo> {
     @ApiModelProperty("三连日期")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date tripletDate;
+    @ApiModelProperty("星期")
+    private String weekInfo;
     @ApiModelProperty("点赞数量")
     private Integer likeNum;
     @ApiModelProperty("收藏数量")

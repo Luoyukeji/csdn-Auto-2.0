@@ -43,7 +43,7 @@ public class BusinessInfoResponse {
             public Object fileType;
             public Object content;
             public Object status;
-            public Object articleId;
+            public String articleId;
             public Object top;
             public Object forcePlan;
             public Object solve;
@@ -61,9 +61,9 @@ public class BusinessInfoResponse {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
-        final List<BusinessInfoResponse.ArticleData.Article> list = data.getList();
-        final BusinessInfoResponse.ArticleData.Article article = list.get(0);
+        final ArticleData data = businessInfoResponse.getData();
+        final List<ArticleData.Article> list = data.getList();
+        final ArticleData.Article article = list.get(0);
         final String type = article.getType();
         final String urlInfo = article.getUrl();
         System.out.println(type);

@@ -81,5 +81,24 @@ public interface CsdnArticleInfoService extends IService<CsdnArticleInfo> {
      * @param username
      */
     void add10Blog(String username, CsdnUserInfo csdnUserInfo);
+
+    /**
+     * 查看某一文章的阅读量
+     *
+     * @param userName
+     * @param articleId
+     * @return
+     */
+    Integer getViewCount(String userName, String articleId);
+
+    /**
+     * 同步本人博客
+     */
+    void syncMyBlog();
+
+    /**
+     * 删除低分文章
+     */
+    void deleteLowBlog();
 }
 

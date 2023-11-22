@@ -4,6 +4,7 @@ package com.kwan.springbootkwan.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
+import com.kwan.springbootkwan.entity.PageBean;
 import com.kwan.springbootkwan.entity.Result;
 import com.kwan.springbootkwan.entity.dto.CsdnTripletDayInfoDTO;
 import com.kwan.springbootkwan.entity.query.CsdnTripletDayInfoQuery;
@@ -27,9 +28,11 @@ import java.util.Objects;
 @RequestMapping("/dayInfo")
 public class CsdnTripletDayInfoController {
 
+
     @Autowired
     private CsdnTripletDayInfoService csdnTripletDayInfoService;
 
+    @ApiOperation(value = "获取今天的三连管理", nickname = "获取今天的三连管理")
     @GetMapping("/add")
     public Result autoReply() {
         return Result.ok(csdnTripletDayInfoService.todayInfo());
@@ -56,7 +59,15 @@ public class CsdnTripletDayInfoController {
             wrapper.le("triplet_date", endFormattedDate);
         }
         wrapper.orderByDesc("create_time");
-        return Result.ok(CsdnTripletDayInfoDTO.Converter.INSTANCE.from(this.csdnTripletDayInfoService.page(pageParm, wrapper)));
+        final PageBean<CsdnTripletDayInfoDTO> from = CsdnTripletDayInfoDTO.Converter.INSTANCE.from(this.csdnTripletDayInfoService.page(pageParm, wrapper));
+        return Result.ok(from);
+    }
+
+    @ApiOperation(value = "重置三连管理的星期字段", nickname = "重置三连管理的星期字段")
+    @GetMapping("/resetWeekInfo")
+    public Result resetWeekInfo() {
+        csdnTripletDayInfoService.resetWeekInfo();
+        return Result.ok("重置三连管理的星期字段完成");
     }
 }
 

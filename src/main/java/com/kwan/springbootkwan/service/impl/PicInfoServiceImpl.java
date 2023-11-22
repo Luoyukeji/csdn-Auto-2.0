@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -109,6 +111,54 @@ public class PicInfoServiceImpl extends ServiceImpl<PicInfoMapper, PicInfo> impl
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public void handleFileUpload(MultipartFile[] files) {
+        for (MultipartFile file : files) {
+            log.info("handleFileUpload() called with: file= {}", file.getOriginalFilename());
+            if (file.isEmpty()) {
+                return;
+            }
+            String fileNameWithoutExtension = getFileNameWithoutExtension(file.getOriginalFilename());
+            PicInfo pic = this.getPicByName(fileNameWithoutExtension);
+            if (Objects.isNull(pic)) {
+                try {
+                    String uploadDir = "/kwan/img/";
+                    File dir = new File(uploadDir);
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
+                    File serverFile = new File(uploadDir + file.getOriginalFilename());
+                    file.transferTo(serverFile);
+                    pic = new PicInfo();
+                    pic.setPicName(fileNameWithoutExtension);
+                    pic.setPicUrl("https://www.qinyingjie.top/img/" + file.getOriginalFilename());
+                    pic.setType(0);
+                    this.save(pic);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    log.error(e.getMessage());
+                }
+            }
+        }
+    }
+
+    private String getFileNameWithoutExtension(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex > 0) {
+            return fileName.substring(0, lastDotIndex);
+        } else {
+            return fileName;
+        }
+    }
+
+    @Override
+    public PicInfo getPicByName(String picName) {
+        QueryWrapper<PicInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("pic_name", picName);
+        wrapper.eq("is_delete", 0);
+        return picInfoMapper.selectOne(wrapper);
     }
 }
 

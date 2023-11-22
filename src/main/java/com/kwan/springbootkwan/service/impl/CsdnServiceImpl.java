@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,8 +33,6 @@ import java.util.Objects;
 @Service
 public class CsdnServiceImpl implements CsdnService {
 
-    @Value("${csdn.num_of_articles_per_person}")
-    private Integer numOfArticlesPerPerson;
     @Value("${csdn.self_user_name}")
     private String selfUserName;
     @Value("${csdn.auto_add_view_count}")
@@ -58,14 +55,11 @@ public class CsdnServiceImpl implements CsdnService {
         final String username = csdnUserInfo.getUserName();
         List<BusinessInfoResponse.ArticleData.Article> list = csdnArticleInfoService.getArticles10(username);
         if (CollectionUtil.isNotEmpty(list)) {
-            final int size = list.size();
-            numOfArticlesPerPerson = size < numOfArticlesPerPerson ? size : numOfArticlesPerPerson;
-            for (int i = 0; i < numOfArticlesPerPerson; i++) {
+            for (int i = 0; i < 1; i++) {
                 final BusinessInfoResponse.ArticleData.Article article = list.get(i);
                 final String type = article.getType();
                 if (!StringUtils.equals("blog", type)) {
                     csdnUserInfo.setArticleType(type);
-                    csdnUserInfo.setUpdateTime(new Date());
                     csdnUserInfoService.updateById(csdnUserInfo);
                     continue;
                 }
@@ -143,7 +137,7 @@ public class CsdnServiceImpl implements CsdnService {
         final Boolean comment = csdnCommentService.isComment(article, csdnUserInfo);
         if (comment) {
             csdnUserInfo.setCommentStatus(CommentStatus.HAVE_ALREADY_COMMENT.getCode());
-        } else if (commentNum >= 48) {
+        } else if (commentNum >= 45) {
             csdnUserInfo.setCommentStatus(CommentStatus.COMMENT_NUM_49.getCode());
             dayInfo.setCommentStatus(CommentStatus.COMMENT_NUM_49.getCode());
         } else if (CommentStatus.COMMENT_IS_FULL.getCode().equals(commentStatus)
@@ -153,11 +147,8 @@ public class CsdnServiceImpl implements CsdnService {
         } else {
             csdnCommentService.comment(articleId, csdnUserInfo, dayInfo);
         }
-        dayInfo.setUpdateTime(new Date());
         csdnTripletDayInfoService.updateById(dayInfo);
-        csdnUserInfo.setUpdateTime(new Date());
         csdnUserInfoService.updateById(csdnUserInfo);
-        csdnArticleInfo.setUpdateTime(new Date());
         csdnArticleInfo.setLikeStatus(csdnUserInfo.getLikeStatus());
         csdnArticleInfo.setCollectStatus(csdnUserInfo.getCollectStatus());
         csdnArticleInfo.setCommentStatus(csdnUserInfo.getCommentStatus());
@@ -199,6 +190,33 @@ public class CsdnServiceImpl implements CsdnService {
                 log.info("耗时秒数:{}", new ObjectMapper().writeValueAsString(stopWatch.getTotalTimeSeconds()));
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void autoAddViewByUrl(String urlBlog) {
+        for (int i = 1; i <= 100; i++) {
+            String ip = IPUtil.generateRandomIP();
+            HttpURLConnection con = null;
+            try {
+                URL url = new URL(urlBlog);
+                con = (HttpURLConnection) url.openConnection();
+                con.setRequestProperty("X-Forward-For", ip);
+                con.setDoOutput(true);
+                con.setRequestMethod("GET");
+                con.setRequestProperty("Content-Type", "text/xml; charset=UTF-8");
+                con.connect();
+                log.info("这是您当前文章被刷新的第{}次。刷新浏览量请求状态码为：{}", i, con.getResponseCode());
+                log.info("文章URL为={}", urlBlog);
+                log.info("----------------------------------------------------------------------------");
+                Thread.sleep(60000);
+            } catch (Exception var7) {
+                log.error("刷新本次失败~~~");
+            } finally {
+                if (Objects.nonNull(con)) {
+                    con.disconnect();
+                }
             }
         }
     }

@@ -21,8 +21,13 @@
 17. 新增每日状态管理,每日超限判断更加合理
 18. 新增自动刷浏览量功能
 19. 新增私信管理
+20. 新增粉丝管理
 
 ### 2.更新日志
+
+#### v0.0.3-20231122
+
+- 新增粉丝管理
 
 #### v0.0.2-20231111
 
@@ -109,7 +114,7 @@ self_comment 替换自己的评论
 - 不需要双引号
 - 使用分号分割
 
-![image-20231025124307813](docs/pic/comment.png)
+![image-20231122155147007](docs/pic/self_comment.png)
 
 ### 4.替换自己的回复
 
@@ -118,29 +123,25 @@ self_reply替换自己的回复,这里是给自己博客评论好友的回复
 - 不需要双引号
 - 使用分号分割
 
-![image-20231110014427715](docs/pic/reply.png)
+![image-20231122155217150](docs/pic/self_reply.png)
 
 ### 5.自刷浏览量设置
 
-![image-20231110014549941](docs/pic/addView.png)
+- 每篇文章刷2000次,实际一天是1440分钟
+- 经过测试100篇文章刷新一遍需要一分钟
+- 那刷24小时,总浏览量可以达到14万左右
+- 设置为2000只是希望达到最大化
+
+![image-20231122155530867](docs/pic/self_brushing_flow.png)
 
 ### 6.替换 cookie
 
 cookie 替换为自己的 cookie 信息,登录 csdn 后,随便访问一个 csdn 地址,可以在 header 中看到 cookie 信息
 
-![image-20231024124240907](docs/pic/self_cookie.png)
+![image-20231122155612246](docs/pic/self_cookie_info.png)
 ![image-20231024124240907](docs/pic/cookie.png)
 
-### 7.API使用
-
-- 将API文件导入到apifox工具中,可以直接调用接口
-- 结合vue前端,实时查看和操作三连
-
-```apl
-docs/apifox.json
-```
-
-### 8.控制层介绍
+### 7.控制层介绍
 
 - CsdnArticleInfoController.java 文章Blog相关
 - CsdnController.java 三连相关
@@ -154,17 +155,7 @@ docs/apifox.json
 
 在 application-local.yml 中修改数据库配置
 
-![image-20231025124238551](docs/pic/db.png)
-
-### 2.关于数据库字段更新
-
-目前字段更新和字段添加没有使用alter table的方式,已经用过的小伙伴升级会比较头痛,后续会使用修改表的方式提供sql脚本出来,方便大家更轻松的升级,但想要真正玩好,还是得理解下简单的代码逻辑,然后搞出更多的玩法!
-
-因为比较小众,就没有遵循版本升级规范,抱歉了各位使用了的小伙伴.后续会规范一些!
-
-```apl
-alter table kwan.table add column `xxxx_name` varchar(100) default null COMMENT 'xxx名' after `xxx_name`;
-```
+![image-20231122155701079](docs/pic/self_mysql.png)
 
 ## 四.启动介绍
 
@@ -199,16 +190,13 @@ Internal error in the mapping processor: java.lang.NullPointerException  	at org
 
 ### 3.docker部署
 
-- 使用docker打镜像
-- 然后运行容器,进行部署
-- mvn clean package -P test
-- docker build -t csdn-automatic-triplet :$VERSION .
+服务器执行 `startup.sh` 文件,需要改一下和自己的目录一致
 
 ![image-20231111104805736](docs/pic/Dockerfile.png)
 
 ### 4.前端访问
 
-前端目前登录做的比较简单
+前端目前登录做的比较简单,基本等于没做校验
 
 ```apl
 #账号

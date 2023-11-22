@@ -1,5 +1,8 @@
 package com.kwan.springbootkwan.constant;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel("常量管理类")
 public class CommonConstant {
     /**
      * 成功
@@ -17,4 +20,5 @@ public class CommonConstant {
      * 文章类型
      */
     public static final String ARTICLE_TYPE_BLOG = "blog";
+
 }

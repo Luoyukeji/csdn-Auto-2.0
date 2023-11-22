@@ -3,8 +3,6 @@ package com.kwan.springbootkwan.entity.csdn;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.lang.Integer;
-import java.lang.String;
 
 @Data
 public class ScoreResponse implements Serializable {
