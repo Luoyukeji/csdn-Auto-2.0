@@ -56,7 +56,7 @@
 
 [Gitcode 地址](https://gitcode.net/qyj19920704/csdn-automatic-triplet)
 
-[kwan 的解忧杂货铺](http://qinyingjie.top/)
+[kwan 的解忧杂货铺](https://www.qinyingjie.top/)
 
 [CSDN 个人主页](https://qinyingjie.blog.csdn.net/?type=blog)
 
