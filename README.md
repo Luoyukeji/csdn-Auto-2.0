@@ -157,6 +157,10 @@ cookie 替换为自己的 cookie 信息,登录 csdn 后,随便访问一个 csdn 
 
 ![image-20231122155701079](docs/pic/self_mysql.png)
 
+### 2.执行sql脚本
+
+在mysql中执行docs/mysql/mysql.sql目录下的sql文件,初始化库和表数据
+
 ## 四.启动介绍
 
 ### 1.本地启动
