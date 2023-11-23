@@ -2,7 +2,7 @@
 cd /kwan/chatbot-vue/end/csdn-automatic-triplet/
 git pull
 mvn package -Dmaven.test.skip=true
-yes | mv /kwan/chatbot-vue/end/vue-springboot-kwan/target/vue-springboot-kwan-0.0.1-SNAPSHOT.jar /kwan/chatbot-vue/end
+yes | mv /kwan/chatbot-vue/end/vue-automatic-kwan/target/vue-automatic-kwan-0.0.1-SNAPSHOT.jar /kwan/chatbot-vue/end
 cd /kwan/chatbot-vue/end
 docker build -t chatbox-vue-8888 .
 docker rm -f chatbox-vue-8888
