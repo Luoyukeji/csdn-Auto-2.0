@@ -119,40 +119,42 @@ public class CsdnServiceImpl implements CsdnService {
         String articleId = urlInfo.substring(urlInfo.lastIndexOf("/") + 1);
         //获取每日三连总信息
         final CsdnTripletDayInfo dayInfo = csdnTripletDayInfoService.todayInfo();
-        final Integer commentStatus = dayInfo.getCommentStatus();
-        //点赞
-        final Boolean isLike = csdnLikeService.isLike(articleId, csdnUserInfo);
-        if (isLike) {
-            csdnUserInfo.setLikeStatus(LikeStatus.HAVE_ALREADY_LIKED.getCode());
-        } else {
-            csdnLikeService.like(articleId, csdnUserInfo, dayInfo);
+        if (Objects.nonNull(dayInfo)) {
+            final Integer commentStatus = dayInfo.getCommentStatus();
+            //点赞
+            final Boolean isLike = csdnLikeService.isLike(articleId, csdnUserInfo);
+            if (isLike) {
+                csdnUserInfo.setLikeStatus(LikeStatus.HAVE_ALREADY_LIKED.getCode());
+            } else {
+                csdnLikeService.like(articleId, csdnUserInfo, dayInfo);
+            }
+            //收藏
+            final Boolean collect = csdnCollectService.isCollect(articleId, csdnUserInfo);
+            if (!collect) {
+                csdnCollectService.collect(article, csdnUserInfo, dayInfo);
+            }
+            //评论
+            final Integer commentNum = dayInfo.getCommentNum();
+            final Boolean comment = csdnCommentService.isComment(article, csdnUserInfo);
+            if (comment) {
+                csdnUserInfo.setCommentStatus(CommentStatus.HAVE_ALREADY_COMMENT.getCode());
+            } else if (commentNum >= 45) {
+                csdnUserInfo.setCommentStatus(CommentStatus.COMMENT_NUM_49.getCode());
+                dayInfo.setCommentStatus(CommentStatus.COMMENT_NUM_49.getCode());
+            } else if (CommentStatus.COMMENT_IS_FULL.getCode().equals(commentStatus)
+                    || CommentStatus.RESTRICTED_COMMENTS.getCode().equals(commentStatus)
+                    || CommentStatus.COMMENT_NUM_49.getCode().equals(commentStatus)) {
+                csdnUserInfo.setCommentStatus(commentStatus);
+            } else {
+                csdnCommentService.comment(articleId, csdnUserInfo, dayInfo);
+            }
+            csdnTripletDayInfoService.updateById(dayInfo);
+            csdnUserInfoService.updateById(csdnUserInfo);
+            csdnArticleInfo.setLikeStatus(csdnUserInfo.getLikeStatus());
+            csdnArticleInfo.setCollectStatus(csdnUserInfo.getCollectStatus());
+            csdnArticleInfo.setCommentStatus(csdnUserInfo.getCommentStatus());
+            csdnArticleInfoService.updateById(csdnArticleInfo);
         }
-        //收藏
-        final Boolean collect = csdnCollectService.isCollect(articleId, csdnUserInfo);
-        if (!collect) {
-            csdnCollectService.collect(article, csdnUserInfo, dayInfo);
-        }
-        //评论
-        final Integer commentNum = dayInfo.getCommentNum();
-        final Boolean comment = csdnCommentService.isComment(article, csdnUserInfo);
-        if (comment) {
-            csdnUserInfo.setCommentStatus(CommentStatus.HAVE_ALREADY_COMMENT.getCode());
-        } else if (commentNum >= 45) {
-            csdnUserInfo.setCommentStatus(CommentStatus.COMMENT_NUM_49.getCode());
-            dayInfo.setCommentStatus(CommentStatus.COMMENT_NUM_49.getCode());
-        } else if (CommentStatus.COMMENT_IS_FULL.getCode().equals(commentStatus)
-                || CommentStatus.RESTRICTED_COMMENTS.getCode().equals(commentStatus)
-                || CommentStatus.COMMENT_NUM_49.getCode().equals(commentStatus)) {
-            csdnUserInfo.setCommentStatus(commentStatus);
-        } else {
-            csdnCommentService.comment(articleId, csdnUserInfo, dayInfo);
-        }
-        csdnTripletDayInfoService.updateById(dayInfo);
-        csdnUserInfoService.updateById(csdnUserInfo);
-        csdnArticleInfo.setLikeStatus(csdnUserInfo.getLikeStatus());
-        csdnArticleInfo.setCollectStatus(csdnUserInfo.getCollectStatus());
-        csdnArticleInfo.setCommentStatus(csdnUserInfo.getCommentStatus());
-        csdnArticleInfoService.updateById(csdnArticleInfo);
     }
 
     @Override
