@@ -12,9 +12,6 @@ docker rm -f ${CONTAINER_NAME}
 #删除镜像
 docker rmi ${IMAGE_NAME}
 
-#拉取镜像
-docker pull ${IMAGE_NAME}
-
 #启动容器
 docker run -d --name ${CONTAINER_NAME} --privileged=true  -e PROFILE=test -w /home -p 8888:80 \
  -v $PWD/logs:/home/logs -v /home/uploads:/home/uploads --restart=always ${IMAGE_NAME}
