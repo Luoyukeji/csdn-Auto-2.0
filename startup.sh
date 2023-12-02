@@ -1,20 +1,10 @@
-#!/usr/bin/env bash
-
-#设置容器名称
-CONTAINER_NAME=csdn-automatic-triplet
-
-#镜像位置与名称
-IMAGE_NAME=csdn-automatic-triplet:latest
-
-#删除容器
-docker rm -f ${CONTAINER_NAME}
-
-#删除镜像
-docker rmi ${IMAGE_NAME}
-
-#启动容器
-docker run -d --name ${CONTAINER_NAME} --privileged=true  -e PROFILE=test -w /home -p 8888:80 \
- -v $PWD/logs:/home/logs -v /home/uploads:/home/uploads --restart=always ${IMAGE_NAME}
-
-#打印日志
-docker logs -f  --tail 500  ${CONTAINER_NAME}
+#!/bin/bash
+#第2种方式打镜像
+cd /kwan/chatbot-vue/end/csdn-automatic-triplet/
+git pull
+mvn package -Dmaven.test.skip=true
+yes | mv /kwan/chatbot-vue/end/vue-automatic-kwan/target/vue-automatic-kwan-0.0.1-SNAPSHOT.jar /kwan/chatbot-vue/end
+cd /kwan/chatbot-vue/end
+docker build -t chatbox-vue-8888 .
+docker rm -f chatbox-vue-8888
+docker run -d -p 8888:80 --restart=always --name chatbox-vue-8888 -v /kwan/img:/kwan/img chatbox-vue-8888
