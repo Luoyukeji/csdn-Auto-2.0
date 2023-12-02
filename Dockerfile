@@ -1,4 +1,4 @@
-FROM deploy.deepexi.com/dce/d2sf-skywalking-base:jdk8-alpine-8.5.0
+FROM openjdk:8
 
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 RUN echo 'Asia/Shanghai' >/etc/timezone
