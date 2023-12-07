@@ -138,7 +138,7 @@ public class CsdnServiceImpl implements CsdnService {
             final Boolean comment = csdnCommentService.isComment(article, csdnUserInfo);
             if (comment) {
                 csdnUserInfo.setCommentStatus(CommentStatus.HAVE_ALREADY_COMMENT.getCode());
-            } else if (commentNum >= 45) {
+            } else if (commentNum >= 42) {
                 csdnUserInfo.setCommentStatus(CommentStatus.COMMENT_NUM_49.getCode());
                 dayInfo.setCommentStatus(CommentStatus.COMMENT_NUM_49.getCode());
             } else if (CommentStatus.COMMENT_IS_FULL.getCode().equals(commentStatus)
