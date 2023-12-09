@@ -129,7 +129,10 @@ public class CsdnLikeCollectServiceImpl implements CsdnLikeCollectService {
                     final String url = article.getUrl();
                     if (isFans && !csdnMessageService.haveRepliedMessage(name, url)) {
                         final String title = article.getTitle();
-                        String messageBody = nick + "大佬最新的文章\n✨" + title + "✨\n" + "\uD83D\uDC4D\uD83C\uDFFB" + url + "\n已三连完成，欢迎大佬回访。👏🏻";
+                        String messageBody = "恭喜" + nick + "大佬发布佳作\uD83C\uDF89\uD83C\uDF89\uD83C\uDF89\n" +
+                                "✨" + title + "✨\n" +
+                                "\uD83D\uDD25 " + url + "\n" +
+                                "已一键三连，欢迎大佬回访。☕☕☕";
                         csdnMessageService.replyMessage(name, 0, messageBody, "WEB", "10_20285116700–1699412958190–182091", "CSDN-PC");
                         csdnMessageService.messageRead(name);
                     }

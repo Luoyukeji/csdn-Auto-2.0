@@ -70,7 +70,7 @@ public class CsdnServiceImpl implements CsdnService {
                 if (Objects.isNull(articleId)) {
                     article.setArticleId(articleIdFormUrl);
                 }
-                CsdnArticleInfo csdnArticleInfo = this.csdnArticleInfoService.getArticleByArticleId(article.getArticleId().toString());
+                CsdnArticleInfo csdnArticleInfo = this.csdnArticleInfoService.getArticleByArticleId(article.getArticleId());
                 if (Objects.isNull(csdnArticleInfo)) {
                     csdnArticleInfo = new CsdnArticleInfo();
                     csdnArticleInfo.setArticleId(article.getArticleId().toString());
