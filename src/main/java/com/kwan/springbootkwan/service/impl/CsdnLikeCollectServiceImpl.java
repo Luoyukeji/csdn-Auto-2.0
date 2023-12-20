@@ -98,13 +98,9 @@ public class CsdnLikeCollectServiceImpl implements CsdnLikeCollectService {
                     }
                 } else {
                     final String username = content.getUsername();
-                    final String nickname = content.getNickname();
-                    final boolean isFans = content.isFans;
                     CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(username);
                     if (Objects.nonNull(csdnUserInfo)) {
                         csdnService.singleArticle(csdnUserInfo);
-                        //发送私信
-                        this.threeAndMessages(username, nickname, isFans);
                     }
                 }
             }

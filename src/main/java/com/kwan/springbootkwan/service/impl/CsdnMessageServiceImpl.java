@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kwan.springbootkwan.constant.CommonConstant;
+import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnHistorySession;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
@@ -20,6 +21,7 @@ import com.kwan.springbootkwan.service.CsdnService;
 import com.kwan.springbootkwan.service.CsdnUserInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,16 +30,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
 @Slf4j
 @Service
 public class CsdnMessageServiceImpl extends ServiceImpl<CsdnHistorySessionMapper, CsdnHistorySession> implements CsdnMessageService {
-
     @Value("${csdn.cookie}")
     private String csdnCookie;
     @Value("${csdn.self_user_name}")
     private String selfUserName;
-
     @Autowired
     private CsdnService csdnService;
     @Autowired
@@ -89,7 +88,6 @@ public class CsdnMessageServiceImpl extends ServiceImpl<CsdnHistorySessionMapper
                                     this.updateById(csdnHistorySession);
                                 }
                             }
-
                         }
                     }
                 }
@@ -105,7 +103,7 @@ public class CsdnMessageServiceImpl extends ServiceImpl<CsdnHistorySessionMapper
     public void dealMessage(List<MessageResponse.MessageData.Sessions> acquireMessage) {
         if (CollectionUtil.isNotEmpty(acquireMessage)) {
             for (MessageResponse.MessageData.Sessions sessions : acquireMessage) {
-                dealMessageByUserName(sessions.getUsername());
+                this.dealMessageByUserName(sessions.getUsername());
             }
         }
     }
@@ -119,11 +117,11 @@ public class CsdnMessageServiceImpl extends ServiceImpl<CsdnHistorySessionMapper
                 final BusinessInfoResponse.ArticleData.Article article = blogs10.get(0);
                 final String url = article.getUrl();
                 if (!haveRepliedMessage(username, url)) {
-                    //获取最新的一篇文章,进行三连
                     CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(username);
                     if (Objects.nonNull(csdnUserInfo)) {
+                        CsdnArticleInfo csdnArticleInfo = this.buildCsdnArticleInfo(username, article, csdnUserInfo);
+                        csdnService.tripletByArticle(csdnUserInfo, article, csdnArticleInfo);
                         final String nickname = csdnUserInfo.getNickName();
-                        csdnService.singleArticle(csdnUserInfo);
                         final String title = article.getTitle();
                         String messageBody = "恭喜" + nickname + "大佬发布佳作\uD83C\uDF89\uD83C\uDF89\uD83C\uDF89\n" +
                                 "✨" + title + "✨\n" +
@@ -140,6 +138,34 @@ public class CsdnMessageServiceImpl extends ServiceImpl<CsdnHistorySessionMapper
                 }
             }
         }
+    }
+
+    @NotNull
+    private CsdnArticleInfo buildCsdnArticleInfo(String username, BusinessInfoResponse.ArticleData.Article article, CsdnUserInfo csdnUserInfo) {
+        final String articleUrl = article.getUrl();
+        String articleIdFormUrl = articleUrl.substring(articleUrl.lastIndexOf("/") + 1);
+        final Object articleId = article.getArticleId();
+        if (Objects.isNull(articleId)) {
+            article.setArticleId(articleIdFormUrl);
+        }
+        CsdnArticleInfo csdnArticleInfo = this.csdnArticleInfoService.getArticleByArticleId(article.getArticleId());
+        if (Objects.isNull(csdnArticleInfo)) {
+            csdnArticleInfo = new CsdnArticleInfo();
+            csdnArticleInfo.setArticleId(article.getArticleId());
+            csdnArticleInfo.setArticleUrl(articleUrl);
+            csdnArticleInfo.setArticleTitle(article.getTitle());
+            csdnArticleInfo.setArticleDescription(article.getDescription());
+            csdnArticleInfo.setUserName(username);
+            csdnArticleInfo.setNickName(csdnUserInfo.getNickName());
+            final Integer score = csdnArticleInfoService.getScore(articleUrl);
+            log.info("质量分={}", score);
+            csdnArticleInfo.setArticleScore(score);
+            if (StringUtils.equals(selfUserName, username)) {
+                csdnArticleInfo.setIsMyself(1);
+            }
+            this.csdnArticleInfoService.saveArticle(csdnArticleInfo);
+        }
+        return csdnArticleInfo;
     }
 
     @Override
