@@ -108,44 +108,46 @@ public class CsdnArticleInfoController {
         if (StringUtils.isNotEmpty(userName) && StringUtils.isNotEmpty(articleId)) {
             List<BusinessInfoResponse.ArticleData.Article> articles = this.csdnArticleInfoService.getArticles10(userName);
             articles = articles.stream().filter(x -> x.getType().equals(CommonConstant.ARTICLE_TYPE_BLOG)).collect(Collectors.toList());
-            for (BusinessInfoResponse.ArticleData.Article article : articles) {
-                final String editUrl = article.getEditUrl();
-                // 定义正则表达式
-                String pattern = "articleId=(\\d+)";
-                Pattern r = Pattern.compile(pattern);
-                // 创建匹配器
-                Matcher m = r.matcher(editUrl);
-                // 查找匹配
-                if (m.find()) {
-                    // 获取匹配到的值
-                    String articleIdInfo = m.group(1);
-                    if (articleId.equals(articleIdInfo)) {
-                        //首先查询用户
-                        CsdnUserInfoQuery addUserInfo = new CsdnUserInfoQuery();
-                        addUserInfo.setUserName(userName);
-                        addUserInfo.setAddType(0);
-                        csdnUserInfoService.add(addUserInfo);
-                        CsdnArticleInfo csdnArticleInfo = this.csdnArticleInfoService.getArticleByArticleId(articleId);
-                        if (csdnArticleInfo == null) {
-                            csdnArticleInfo = new CsdnArticleInfo();
-                            final String url = article.getUrl();
-                            csdnArticleInfo.setArticleId(articleId);
-                            csdnArticleInfo.setUserName(userName);
-                            csdnArticleInfo.setArticleTitle(article.getTitle());
-                            csdnArticleInfo.setArticleDescription(article.getDescription());
-                            csdnArticleInfo.setArticleUrl(url);
-                            csdnArticleInfo.setNickName(addUserInfo.getNickName());
-                            if (StringUtils.equals(selfUserName, userName)) {
-                                csdnArticleInfo.setIsMyself(1);
+            if (CollectionUtil.isNotEmpty(articles)) {
+                for (BusinessInfoResponse.ArticleData.Article article : articles) {
+                    final String editUrl = article.getEditUrl();
+                    // 定义正则表达式
+                    String pattern = "articleId=(\\d+)";
+                    Pattern r = Pattern.compile(pattern);
+                    // 创建匹配器
+                    Matcher m = r.matcher(editUrl);
+                    // 查找匹配
+                    if (m.find()) {
+                        // 获取匹配到的值
+                        String articleIdInfo = m.group(1);
+                        if (articleId.equals(articleIdInfo)) {
+                            //首先查询用户
+                            CsdnUserInfoQuery addUserInfo = new CsdnUserInfoQuery();
+                            addUserInfo.setUserName(userName);
+                            addUserInfo.setAddType(0);
+                            csdnUserInfoService.add(addUserInfo);
+                            CsdnArticleInfo csdnArticleInfo = this.csdnArticleInfoService.getArticleByArticleId(articleId);
+                            if (csdnArticleInfo == null) {
+                                csdnArticleInfo = new CsdnArticleInfo();
+                                final String url = article.getUrl();
+                                csdnArticleInfo.setArticleId(articleId);
+                                csdnArticleInfo.setUserName(userName);
+                                csdnArticleInfo.setArticleTitle(article.getTitle());
+                                csdnArticleInfo.setArticleDescription(article.getDescription());
+                                csdnArticleInfo.setArticleUrl(url);
+                                csdnArticleInfo.setNickName(addUserInfo.getNickName());
+                                if (StringUtils.equals(selfUserName, userName)) {
+                                    csdnArticleInfo.setIsMyself(1);
+                                }
+                                //查询质量分数
+                                csdnArticleInfo.setArticleScore(csdnArticleInfoService.getScore(url));
+                                this.csdnArticleInfoService.saveArticle(csdnArticleInfo);
                             }
-                            //查询质量分数
-                            csdnArticleInfo.setArticleScore(csdnArticleInfoService.getScore(url));
-                            this.csdnArticleInfoService.saveArticle(csdnArticleInfo);
+                            break;
                         }
-                        break;
                     }
-                }
 
+                }
             }
         }
         return Result.ok();
@@ -163,14 +165,13 @@ public class CsdnArticleInfoController {
         return Result.ok(this.csdnArticleInfoService.updateById(csdnUserInfo));
     }
 
-    @ApiOperation(value = "删除文章", nickname = "删除文章")
+    @ApiOperation(value = "删除文章--物理删除", nickname = "删除文章--物理删除")
     @GetMapping("/delete")
     public Result delete(@RequestParam("id") Integer id) {
-        CsdnArticleInfo csdnArticleInfo = new CsdnArticleInfo();
-        csdnArticleInfo.setIsDelete(1);
         QueryWrapper<CsdnArticleInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("id", id);
-        return Result.ok(this.csdnArticleInfoService.update(csdnArticleInfo, wrapper));
+        this.csdnArticleInfoService.remove(wrapper);
+        return Result.ok("删除文章成功");
     }
 
     @ApiOperation(value = "单篇文章三连", nickname = "单篇文章三连")
@@ -259,12 +260,10 @@ public class CsdnArticleInfoController {
         return Result.ok("同步本人博客到表中成功");
     }
 
-
     @ApiOperation(value = "删除低分文章", nickname = "删除低分文章")
     @GetMapping("/deletaLowBlog")
     public Result deletaLowBlog() {
         this.csdnArticleInfoService.deleteLowBlog();
         return Result.ok("删除低分文章成功");
     }
-
 }

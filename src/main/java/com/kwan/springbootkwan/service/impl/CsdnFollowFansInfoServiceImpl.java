@@ -8,12 +8,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kwan.springbootkwan.entity.CsdnFollowFansInfo;
+import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.csdn.DeleteFollowQuery;
 import com.kwan.springbootkwan.entity.csdn.DeleteFollowResponse;
 import com.kwan.springbootkwan.entity.csdn.FansResponse;
 import com.kwan.springbootkwan.mapper.CsdnFollowFansInfoMapper;
+import com.kwan.springbootkwan.service.CsdnArticleInfoService;
 import com.kwan.springbootkwan.service.CsdnFollowFansInfoService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,11 +31,15 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
     private String csdnCookie;
     @Value("${csdn.self_user_name}")
     private String selfUserName;
+    @Autowired
+    private CsdnArticleInfoService csdnArticleInfoService;
 
     @Override
     public void saveFans() {
         //删除全部数据
         QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("is_delete", 0);
+        wrapper.ne("need_notice", 1);
         this.remove(wrapper);
         Integer fanId = this.getFanId();
         while (Objects.nonNull(fanId)) {
@@ -42,7 +49,7 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
 
     @Override
     public void saveFollow() {
-        final List<CsdnFollowFansInfo> all = getAll();
+        final List<CsdnFollowFansInfo> all = this.getAll();
         if (CollectionUtil.isNotEmpty(all) && all.size() >= 1500) {
             Integer fanId = this.getFollowId();
             while (Objects.nonNull(fanId)) {
@@ -58,28 +65,14 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
             onlyFollow = getOnlyFollow();
             if (CollectionUtil.isNotEmpty(onlyFollow)) {
                 for (CsdnFollowFansInfo csdnFollowFansInfo : onlyFollow) {
-                    //取消关注
-                    DeleteFollowQuery deleteFollowQuery = new DeleteFollowQuery();
-                    deleteFollowQuery.setUsername(selfUserName);
-                    deleteFollowQuery.setDetailSourceName("个人主页");
-                    deleteFollowQuery.setFollow(csdnFollowFansInfo.getUserName());
-                    deleteFollowQuery.setFromType("pc");
-                    deleteFollowQuery.setSource("ME");
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    String jsonCollectInfo = objectMapper.writeValueAsString(deleteFollowQuery);
-                    HttpResponse response = HttpUtil.createPost("https://mp-action.csdn.net/interact/wrapper/pc/fans/v1/api/unFollow")
-                            .header("Cookie", csdnCookie)
-                            .header("Content-Type", "application/json")
-                            .body(jsonCollectInfo)
-                            .execute();
-                    final String body = response.body();
-                    DeleteFollowResponse collectResponse = objectMapper.readValue(body, DeleteFollowResponse.class);
-                    final Integer code = collectResponse.getCode();
-                    final String msg = collectResponse.getMsg();
+                    final DeleteFollowResponse deleteFollowResponse = this.cancelFollow(csdnFollowFansInfo);
+                    final Integer code = deleteFollowResponse.getCode();
+                    final String msg = deleteFollowResponse.getMsg();
                     if ("200".equals(code.toString())) {
-                        //取消成功了直接删除
-                        csdnFollowFansInfo.setIsDelete(1);
-                        this.updateById(csdnFollowFansInfo);
+                        this.removeById(csdnFollowFansInfo);
+                    } else if ("400100101".equals(code.toString())) {
+                        log.info("取消关注失败,code={},msg={}", code, msg);
+                        break;
                     } else {
                         log.info("取消关注失败,code={},msg={}", code, msg);
                     }
@@ -90,6 +83,129 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
         }
     }
 
+    /**
+     * 取消关注
+     *
+     * @param csdnFollowFansInfo
+     * @throws JsonProcessingException
+     */
+    private DeleteFollowResponse cancelFollow(CsdnFollowFansInfo csdnFollowFansInfo) throws JsonProcessingException {
+        //取消关注
+        DeleteFollowQuery deleteFollowQuery = new DeleteFollowQuery();
+        deleteFollowQuery.setUsername(selfUserName);
+        deleteFollowQuery.setDetailSourceName("个人主页");
+        deleteFollowQuery.setFollow(csdnFollowFansInfo.getUserName());
+        deleteFollowQuery.setFromType("pc");
+        deleteFollowQuery.setSource("ME");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonCollectInfo = objectMapper.writeValueAsString(deleteFollowQuery);
+        HttpResponse response = HttpUtil.createPost("https://mp-action.csdn.net/interact/wrapper/pc/fans/v1/api/unFollow")
+                .header("Cookie", csdnCookie)
+                .header("Content-Type", "application/json")
+                .body(jsonCollectInfo)
+                .execute();
+        final String body = response.body();
+        return objectMapper.readValue(body, DeleteFollowResponse.class);
+    }
+
+    @Override
+    public void deleteFollowStart23() {
+        QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("is_delete", 0);
+        wrapper.ne("need_notice", 1);
+        wrapper.likeRight("user_name", "2301_");
+        final List<CsdnFollowFansInfo> list = this.list(wrapper);
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (CsdnFollowFansInfo csdnFollowFansInfo : list) {
+                try {
+                    final DeleteFollowResponse deleteFollowResponse = this.cancelFollow(csdnFollowFansInfo);
+                    final Integer code = deleteFollowResponse.getCode();
+                    final String msg = deleteFollowResponse.getMsg();
+                    if ("200".equals(code.toString())) {
+                        this.removeById(csdnFollowFansInfo);
+                    } else if ("400100101".equals(code.toString())) {
+                        log.info("您取关已达上限，请24小时后再试。,code={},msg={}", code, msg);
+                        break;
+                    } else {
+                        log.info("取消关注失败,code={},msg={}", code, msg);
+                    }
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void updatePostTime() {
+        QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("is_delete", 0);
+        wrapper.in("relation_type", "互关", "粉丝");
+        final List<CsdnFollowFansInfo> list = this.list(wrapper);
+        if (CollectionUtil.isNotEmpty(list)) {
+            for (CsdnFollowFansInfo csdnFollowFansInfo : list) {
+                final String userName = csdnFollowFansInfo.getUserName();
+                //获取最新的文章
+                final List<BusinessInfoResponse.ArticleData.Article> articles10 = csdnArticleInfoService.getArticles10(userName);
+                if (CollectionUtil.isNotEmpty(articles10)) {
+                    final BusinessInfoResponse.ArticleData.Article article = articles10.get(0);
+                    csdnFollowFansInfo.setPostTime(article.getPostTime());
+                    this.updateById(csdnFollowFansInfo);
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<CsdnFollowFansInfo> noticeUsers(Integer number) {
+        QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("is_delete", 0);
+        wrapper.eq("need_notice", 1);
+        wrapper.orderByAsc("rand()").last("limit " + number);
+        return this.list(wrapper);
+    }
+
+    @Override
+    public boolean isIntercorrelation(String username) {
+        QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("is_delete", 0);
+        wrapper.eq("user_name", username);
+        wrapper.eq("relation_type", "互关");
+        wrapper.last("limit 1");
+        if (Objects.nonNull(this.getOne(wrapper))) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void deleteNoArticle() {
+        final List<CsdnFollowFansInfo> all = this.getConcernCorrelation();
+        if (CollectionUtil.isNotEmpty(all)) {
+            for (CsdnFollowFansInfo csdnFollowFansInfo : all) {
+                final String userName = csdnFollowFansInfo.getUserName();
+                final List<BusinessInfoResponse.ArticleData.Article> articles10 = csdnArticleInfoService.getArticles10(userName);
+                if (CollectionUtil.isEmpty(articles10)) {
+                    final DeleteFollowResponse deleteFollowResponse;
+                    try {
+                        deleteFollowResponse = this.cancelFollow(csdnFollowFansInfo);
+                        final Integer code = deleteFollowResponse.getCode();
+                        final String msg = deleteFollowResponse.getMsg();
+                        if ("200".equals(code.toString())) {
+                            this.removeById(csdnFollowFansInfo);
+                        } else if ("400100101".equals(code.toString())) {
+                            log.info("您取关已达上限，请24小时后再试。,code={},msg={}", code, msg);
+                            break;
+                        } else {
+                            log.info("取消关注失败,code={},msg={}", code, msg);
+                        }
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public List<CsdnFollowFansInfo> getAll() {
@@ -103,6 +219,14 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
         QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("is_delete", 0);
         wrapper.eq("relation_type", "已关注");
+        return this.list(wrapper);
+    }
+
+    @Override
+    public List<CsdnFollowFansInfo> getConcernCorrelation() {
+        QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("is_delete", 0);
+        wrapper.in("relation_type", "互关", "已关注");
         return this.list(wrapper);
     }
 
@@ -202,7 +326,7 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
             if (CollectionUtil.isNotEmpty(list)) {
                 for (FansResponse.FansData.FansListData fansListData : list) {
                     final String username = fansListData.getUsername();
-                    CsdnFollowFansInfo byUserName = getByUserName(username);
+                    CsdnFollowFansInfo byUserName = this.getByUserName(username);
                     if (Objects.nonNull(byUserName)) {
                         byUserName.setRelationType("互关");
                         this.updateById(byUserName);

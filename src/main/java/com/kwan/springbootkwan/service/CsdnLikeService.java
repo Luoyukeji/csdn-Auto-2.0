@@ -4,13 +4,7 @@ package com.kwan.springbootkwan.service;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 
-/**
- * 点赞
- *
- * @author : qinyingjie
- * @version : 2.2.0
- * @date : 2023/10/24 00:19
- */
+
 public interface CsdnLikeService {
 
     /**

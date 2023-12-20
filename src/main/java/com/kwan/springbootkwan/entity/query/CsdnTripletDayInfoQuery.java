@@ -13,6 +13,8 @@ import java.util.Date;
 public class CsdnTripletDayInfoQuery extends BasePage {
     @ApiModelProperty("主键id")
     private Integer id;
+    @ApiModelProperty("星期")
+    private String weekInfo;
     @ApiModelProperty("开始日期")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date startDate;

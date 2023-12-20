@@ -1,34 +1,27 @@
 package com.kwan.springbootkwan.entity;
 
 import com.baomidou.mybatisplus.extension.activerecord.Model;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
 
-/**
- * 名言警句(AphorismPoetry)表实体类
- *
- * @author makejava
- * @since 2023-10-09 11:13:13
- */
-@SuppressWarnings("serial")
+
 @Data
+@ApiModel("名言警句实体类")
 public class AphorismPoetry extends Model<AphorismPoetry> {
-    /**
-     * 主键id
-     */
+
+    @ApiModelProperty("主键id")
     private Integer id;
-    /**
-     * 诗词内容
-     */
+
+    @ApiModelProperty("诗词内容")
     private String poetryText;
-    /**
-     * 创建时间
-     */
+
+    @ApiModelProperty("创建时间")
     private Date createTime;
-    /**
-     * 逻辑删除,0未删除,1已删除
-     */
+
+    @ApiModelProperty("逻辑删除,0未删除,1已删除")
     private Integer isDelete;
 }
 

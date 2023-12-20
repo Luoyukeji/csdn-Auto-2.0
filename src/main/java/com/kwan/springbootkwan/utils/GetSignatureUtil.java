@@ -4,24 +4,30 @@ import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
 
-
-/**
- * Signature生成工具类
- *
- * @author : qinyingjie
- * @version : 2.2.0
- * @date : 2023/11/22 13:52
- */
 public class GetSignatureUtil {
 
+    private static byte[] parseUtf8(String input) {
+        try {
+            return input.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // 处理异常，这里简单地打印异常信息
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-    public static String sign(String fullUrl, String method, String onceKey, String xcakey, String ekey) throws Exception {
-        String[] wholdUrl = fullUrl.split("\\?");
+    public static String sign(String path, String method, String onceKey, String xcakey, String ekey) throws Exception {
+        String[] wholdUrl = path.split("\\?");
         String url, params = "";
         if ("get".equals(method)) {
-            url = wholdUrl[0];
-            params = wholdUrl[1];
+            if (wholdUrl.length >= 2) {
+                url = wholdUrl[0];
+                params = wholdUrl[1];
+            } else {
+                url = wholdUrl[0];
+            }
         } else {
             url = wholdUrl[0];
         }

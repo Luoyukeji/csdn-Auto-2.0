@@ -120,7 +120,7 @@ public class PicInfoServiceImpl extends ServiceImpl<PicInfoMapper, PicInfo> impl
             if (file.isEmpty()) {
                 return;
             }
-            String fileNameWithoutExtension = getFileNameWithoutExtension(file.getOriginalFilename());
+            String fileNameWithoutExtension = this.getFileNameWithoutExtension(file.getOriginalFilename());
             PicInfo pic = this.getPicByName(fileNameWithoutExtension);
             if (Objects.isNull(pic)) {
                 try {

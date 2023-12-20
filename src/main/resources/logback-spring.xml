@@ -13,7 +13,7 @@
         </encoder>
     </appender>
 
-    <springProfile name="dev,test,local">
+    <springProfile name="dev,test,local,prd">
         <property name="log.dir" value="./logs/"/>
         <property name="file.log.pattern"
                   value="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%thread] %logger{36} - %msg%n"/>
@@ -42,7 +42,7 @@
     </springProfile>
 
     <!--    如果是本地环境,则设置控制台打印-->
-    <springProfile name="test,uat">
+    <springProfile name="test,uat,prd">
         <logger name="com.kwan.springbootkwan.mapper" level="DEBUG" additivity="false">
             <appender-ref ref="STDOUT"/>
         </logger>

@@ -13,6 +13,13 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+/**
+ * 通过@Configuration注解，表明它是一个配置类 @EnableSwagger2开启swagger2。 apiINfo()配置一些基本的信息。apis()指定扫描的包会生成文档。
+ *
+ * @author : qinyingjie
+ * @version : 2.2.0
+ * @date : 2022/12/19 17:23
+ */
 @Configuration
 @EnableSwagger2
 public class Swagger2Config {

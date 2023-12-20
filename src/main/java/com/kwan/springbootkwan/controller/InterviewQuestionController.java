@@ -9,6 +9,7 @@ import com.kwan.springbootkwan.entity.dto.InterviewQuestionDTO;
 import com.kwan.springbootkwan.entity.query.InterviewQuestionAdd;
 import com.kwan.springbootkwan.entity.query.InterviewQuestionUpdate;
 import com.kwan.springbootkwan.service.InterviewQuestionService;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,58 +29,22 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("interviewQuestion")
 public class InterviewQuestionController {
-    /**
-     * 服务对象
-     */
+
     @Resource
     private InterviewQuestionService interviewQuestionService;
 
-    /**
-     * 导入问题
-     *
-     * @return 所有数据
-     */
-    @GetMapping("/upload")
-    public Result uploadFile(@RequestParam String path) {
-        return Result.ok(this.interviewQuestionService.uploadFile(path));
-    }
-
-    /**
-     * 获取面试题的种类的数量
-     *
-     * @return
-     */
-    @GetMapping("/questionType")
-    public Result questionType() {
-        return Result.ok(this.interviewQuestionService.questionType());
-    }
-
-    /**
-     * 获取所有的面试题的种类的数量
-     *
-     * @return
-     */
-    @GetMapping("/allQuestionType")
-    public Result allQuestionType() {
-        return Result.ok(this.interviewQuestionService.allQuestionType());
-    }
-
-    /**
-     * 分页查询所有数据
-     *
-     * @return 所有数据
-     */
+    @ApiOperation(value = "获取面试题", nickname = "获取面试题")
     @GetMapping("/page")
     public Result selectAll(@RequestParam Integer page
             , @RequestParam Integer pageSize
             , @RequestParam String question
-            , @RequestParam Integer questionType) {
+            , @RequestParam String questionType) {
         Page<InterviewQuestion> pageParm = new Page<>();
         pageParm.setCurrent(page);
         pageParm.setSize(pageSize);
         QueryWrapper<InterviewQuestion> wrapper = new QueryWrapper<>();
         wrapper.orderByDesc("id");
-        if (questionType != 0) {
+        if (StringUtils.isNotEmpty(questionType)) {
             wrapper.eq("question_type", questionType);
         }
         wrapper.eq("is_delete", 0);
@@ -137,7 +102,11 @@ public class InterviewQuestionController {
         }
         return Result.ok();
     }
-
+    @ApiOperation(value = "导入问题", nickname = "导入问题")
+    @GetMapping("/upload")
+    public Result uploadFile(@RequestParam String path) {
+        return Result.ok(this.interviewQuestionService.uploadFile(path));
+    }
     /**
      * 更新面试题
      *

@@ -4,14 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
-/**
- * Nonce生成工具类
- *
- * @author : qinyingjie
- * @version : 2.2.0
- * @date : 2023/11/22 13:52
- */
 public class GetNonceUtil {
     private static List<String> chats = new ArrayList<>();
 

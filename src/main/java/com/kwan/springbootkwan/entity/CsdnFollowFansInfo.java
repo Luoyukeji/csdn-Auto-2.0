@@ -23,6 +23,10 @@ public class CsdnFollowFansInfo extends Model<CsdnFollowFansInfo> {
     private String blogUrl;
     @ApiModelProperty("与我的关系")
     private String relationType;
+    @ApiModelProperty("发布时间")
+    private Date postTime;
+    @ApiModelProperty("是否需要通知,0不需要,1需要")
+    private String needNotice;
     @ApiModelProperty("创建时间")
     private Date createTime;
     @ApiModelProperty("更新时间")

@@ -5,13 +5,7 @@ import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.csdn.CommentResponse;
 
-/**
- * 评论
- *
- * @author : qinyingjie
- * @version : 2.2.0
- * @date : 2023/10/24 01:25
- */
+
 public interface CsdnCommentService {
 
     /**

@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,20 +59,6 @@ public class InterviewQuestionServiceImpl extends ServiceImpl<InterviewQuestionM
             e.printStackTrace();
         }
         return true;
-    }
-
-    @Override
-    public List<InterviewQuestionTypeDTO> questionType() {
-        final List<InterviewQuestionTypeDTO> interviewQuestionTypeDTOS = this.allQuestionType();
-        //获取种类,并按数量排序
-        LinkedList<InterviewQuestionTypeDTO> types = interviewQuestionMapper.questionType();
-        types.addFirst(new InterviewQuestionTypeDTO(0, "全部", 0));
-        for (InterviewQuestionTypeDTO interviewQuestionTypeDTO : types) {
-            //数据库存的是问题类型的编码
-            final InterviewQuestionTypeDTO item = interviewQuestionTypeDTOS.stream().filter(x -> x.getQuestionType().equals(interviewQuestionTypeDTO.getQuestionType())).findFirst().get();
-            interviewQuestionTypeDTO.setName(item.getName());
-        }
-        return types;
     }
 
     @Override

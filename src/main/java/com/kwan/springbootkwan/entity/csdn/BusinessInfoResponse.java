@@ -1,9 +1,13 @@
 package com.kwan.springbootkwan.entity.csdn;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -32,7 +36,10 @@ public class BusinessInfoResponse {
             public String url;
             public Integer commentCount;
             public String rtype;
-            public Object postTime;
+            @TableField(value = "postTime")
+            @ApiModelProperty(value = "时间")
+            @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+            public Date postTime;
             public String editUrl;
             public Object createTime;
             public Integer articleType;

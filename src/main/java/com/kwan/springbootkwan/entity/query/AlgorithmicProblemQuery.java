@@ -7,7 +7,7 @@ public class AlgorithmicProblemQuery {
     private Integer id;
     private Integer addType;
     private String questionName;
-    private Integer questionType;
+    private String questionType;
     private Integer degreeOfImportance;
     private Integer degreeOfDifficulty;
     private Integer difficultyOfScore;

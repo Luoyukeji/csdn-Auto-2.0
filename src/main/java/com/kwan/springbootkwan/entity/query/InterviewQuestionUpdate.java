@@ -7,5 +7,5 @@ public class InterviewQuestionUpdate {
 
     private Integer id;
     private String question;
-    private Integer questionType;
+    private String questionType;
 }

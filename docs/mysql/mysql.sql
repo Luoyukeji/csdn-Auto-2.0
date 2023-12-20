@@ -1,22 +1,13 @@
---删除数据库
-DROP
-DATABASE IF EXISTS kwan;
---创建数据库
-CREATE
-DATABASE kwan;
---切换数据库
-USE
-kwan;
 -- kwan.algorithmic_problem definition
-DROP TABLE IF EXISTS `algorithmic_problem`;
+DROP TABLE if EXISTS `algorithmic_problem`;
 CREATE TABLE `algorithmic_problem`
 (
     `id`                   int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `question_name`        varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-    `question_type`        int NOT NULL                                                  DEFAULT '0' COMMENT '0:''全部'';\n1: ''基础知识'';\n2: ''集合'';\n3: ''JVM'';\n4: ''并发编程'';\n5:''MySql'';\n6: ''Redis'';\n7: ''中间件'';\n8: ''Spring'';\n9: ''微服务'';\n10:''分布式'';\n11:''项目'';\n12:''算法'';\n99: ''其他'';',
-    `degree_of_importance` int NOT NULL                                                  DEFAULT '0' COMMENT '1~10的分值',
-    `degree_of_difficulty` int NOT NULL                                                  DEFAULT '1' COMMENT '1:简单;2:中等;3:困难',
-    `difficulty_of_score`  int NOT NULL                                                  DEFAULT '0' COMMENT '困难指数',
+    `question_type`        varchar(10) NOT NULL                                          DEFAULT '0' COMMENT '类型',
+    `degree_of_importance` int         NOT NULL                                          DEFAULT '0' COMMENT '1~10的分值',
+    `degree_of_difficulty` int         NOT NULL                                          DEFAULT '1' COMMENT '1:简单;2:中等;3:困难',
+    `difficulty_of_score`  int         NOT NULL                                          DEFAULT '0' COMMENT '困难指数',
     `leetcode_number`      int                                                           DEFAULT NULL COMMENT '力扣的问题号',
     `leetcode_link`        varchar(200)                                                  DEFAULT NULL COMMENT '力扣的问题号',
     `create_time`          timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -27,7 +18,7 @@ CREATE TABLE `algorithmic_problem`
 
 
 -- kwan.aphorism_poetry definition
-DROP TABLE IF EXISTS `aphorism_poetry`;
+DROP TABLE if EXISTS `aphorism_poetry`;
 CREATE TABLE `aphorism_poetry`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -40,7 +31,7 @@ CREATE TABLE `aphorism_poetry`
 
 
 -- kwan.chatbot definition
-DROP TABLE IF EXISTS `chatbot`;
+DROP TABLE if EXISTS `chatbot`;
 CREATE TABLE `chatbot`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT,
@@ -49,11 +40,32 @@ CREATE TABLE `chatbot`
     `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
     `is_delete`   tinyint(1) NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='聊天机器人记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='聊天机器人记录表';
+
+
+-- kwan.csdn_account_management definition
+DROP TABLE if EXISTS `csdn_account_management`;
+CREATE TABLE `csdn_account_management`
+(
+    `id`           int unsigned NOT NULL AUTO_INCREMENT,
+    `amount`       decimal(10, 2) NOT NULL COMMENT '金额',
+    `product`      varchar(30)    NOT NULL COMMENT '金额业务类型',
+    `code`         int            NOT NULL DEFAULT '0' COMMENT '业务code,7000:红包收入',
+    `order_no`     varchar(30)    NOT NULL COMMENT '订单号',
+    `expire_time`  varchar(30)             DEFAULT NULL COMMENT '过期时间',
+    `operate_type` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1收入 2支出',
+    `description`  varchar(100)   NOT NULL COMMENT '详情',
+    `time`         varchar(30)    NOT NULL COMMENT '时间',
+    `product_name` varchar(30)    NOT NULL COMMENT '业务名称',
+    `create_time`  timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `is_delete`    tinyint(1) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='余额信息表';
 
 
 -- kwan.csdn_article_info definition
-DROP TABLE IF EXISTS `csdn_article_info`;
+DROP TABLE if EXISTS `csdn_article_info`;
 CREATE TABLE `csdn_article_info`
 (
     `id`                  int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -78,24 +90,26 @@ CREATE TABLE `csdn_article_info`
 
 
 -- kwan.csdn_follow_fans_info definition
-DROP TABLE IF EXISTS `csdn_follow_fans_info`;
+DROP TABLE if EXISTS `csdn_follow_fans_info`;
 CREATE TABLE `csdn_follow_fans_info`
 (
     `id`            int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `user_name`     varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '用户名',
-    `nick_name`     varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '用户昵称',
-    `blog_url`      varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '博客地址',
-    `relation_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '与我的关系',
+    `nick_name`     varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '昵称',
+    `blog_url`      varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '主页',
+    `relation_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '关系类型',
+    `post_time`     timestamp NULL DEFAULT NULL COMMENT '发布时间',
+    `need_notice`   int NOT NULL                                                  DEFAULT '0' COMMENT '需要红包通知',
     `create_time`   timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`   timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_delete`     tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除,0未删除,1已删除',
     PRIMARY KEY (`id`) USING BTREE,
-    KEY             `csdn_red_package_order_no_IDX` (`user_name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='csdn关注与粉丝信息';
+    UNIQUE KEY `unique_user_name` (`user_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='粉丝关注';
 
 
 -- kwan.csdn_history_session definition
-DROP TABLE IF EXISTS `csdn_history_session`;
+DROP TABLE if EXISTS `csdn_history_session`;
 CREATE TABLE `csdn_history_session`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -112,17 +126,16 @@ CREATE TABLE `csdn_history_session`
     KEY           `interview_question_question_IDX` (`user_name`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='csdn私信用户管理';
 
-
 -- kwan.csdn_triplet_day_info definition
-DROP TABLE IF EXISTS `csdn_triplet_day_info`;
+DROP TABLE if EXISTS `csdn_triplet_day_info`;
 CREATE TABLE `csdn_triplet_day_info`
 (
     `id`             int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `triplet_date`   date                                                         DEFAULT NULL COMMENT '三连日期',
-    `week_info`      varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '星期',
     `like_num`       int NOT NULL                                                 DEFAULT '0' COMMENT '点赞数量',
     `collect_num`    int NOT NULL                                                 DEFAULT '0' COMMENT '收藏数量',
     `comment_num`    int NOT NULL                                                 DEFAULT '0' COMMENT '评论数量',
+    `week_info`      varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '星期',
     `like_status`    tinyint(1) NOT NULL DEFAULT '9' COMMENT '点赞状态:\n0:未处理;\n1:已经点过赞;\n2:点赞已满;\n3:取消点赞;\n9:点赞成功;',
     `collect_status` tinyint(1) NOT NULL DEFAULT '9' COMMENT '收藏状态:\n0:未处理;\n1:已经收藏过;\n2:收藏已满;\n3:参数缺失;\n9:收藏成功;',
     `comment_status` tinyint(1) NOT NULL DEFAULT '9' COMMENT '评论状态:\n0:未处理;\n1:已经评论过;\n2:评论已满;\n3:禁言;\n4:评论太快;\n5:评论已经到了49条;\n8:其他错误;\n9:评论成功;',
@@ -136,7 +149,7 @@ CREATE TABLE `csdn_triplet_day_info`
 
 
 -- kwan.csdn_user_info definition
-DROP TABLE IF EXISTS `csdn_user_info`;
+DROP TABLE if EXISTS `csdn_user_info`;
 CREATE TABLE `csdn_user_info`
 (
     `id`             int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -158,7 +171,7 @@ CREATE TABLE `csdn_user_info`
 
 
 -- kwan.department definition
-DROP TABLE IF EXISTS `department`;
+DROP TABLE if EXISTS `department`;
 CREATE TABLE `department`
 (
     `id`         int                                                           NOT NULL AUTO_INCREMENT,
@@ -169,11 +182,11 @@ CREATE TABLE `department`
     `deleted`    tinyint(1) NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`),
     KEY          `department_parent_id_IDX` (`parent_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='部门';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='部门';
 
 
 -- kwan.dictionary_management definition
-DROP TABLE IF EXISTS `dictionary_management`;
+DROP TABLE if EXISTS `dictionary_management`;
 CREATE TABLE `dictionary_management`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -184,33 +197,33 @@ CREATE TABLE `dictionary_management`
     `is_delete`   tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除,0未删除,1已删除',
     PRIMARY KEY (`id`) USING BTREE,
     KEY           `interview_question_question_IDX` (`dict_type`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='字典表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='字典表';
 
 
 -- kwan.interview_question definition
-DROP TABLE IF EXISTS `interview_question`;
+DROP TABLE if EXISTS `interview_question`;
 CREATE TABLE `interview_question`
 (
     `id`            int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
-    `question`      varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+    `question`      varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '问题',
+    `question_type` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '问题类型',
     `response`      text COMMENT '问题回答',
-    `question_type` int NOT NULL                                                  DEFAULT '0' COMMENT '0:''全部'';\n1: ''基础知识'';\n2: ''集合'';\n3: ''JVM'';\n4: ''并发编程'';\n5:''MySql'';\n6: ''Redis'';\n7: ''中间件'';\n8: ''Spring'';\n9: ''微服务'';\n10:''分布式'';\n11:''项目'';\n12:''算法'';\n99: ''其他'';',
     `create_time`   timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `is_delete`     tinyint(1) NOT NULL DEFAULT '0' COMMENT '逻辑删除,0未删除,1已删除',
     PRIMARY KEY (`id`) USING BTREE,
     KEY             `interview_question_question_IDX` (`question`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='面试题';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='面试题';
 
 
 -- kwan.pic_info definition
-DROP TABLE IF EXISTS `pic_info`;
+DROP TABLE if EXISTS `pic_info`;
 CREATE TABLE `pic_info`
 (
     `id`          int unsigned NOT NULL AUTO_INCREMENT,
     `pic_name`    varchar(100) NOT NULL COMMENT '图片名称',
     `pic_url`     varchar(255) NOT NULL COMMENT '图片地址',
-    `type`        tinyint(1) NOT NULL DEFAULT '0' COMMENT '图片类型,0:宝宝,1:学习,2:风景,3:美女,4:猫咪,5:素材;6:动漫;99:其他',
+    `type`        tinyint(1) NOT NULL DEFAULT '0' COMMENT '图片类型,0:表示宝宝图片,1:学习图片,2:风景,3:美女,99:其他',
     `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
     `is_delete`   tinyint(1) NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='图片信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='图片信息表';

@@ -66,7 +66,7 @@ public class RedPackageResponse implements Serializable {
             private Object source;
             private Object readCount;
             private Object activityId;
-            private Object createdAt;
+            private String createdAt;
             private Object video;
             private Object textInfo;
             @JsonProperty("nickname")
@@ -449,11 +449,11 @@ public class RedPackageResponse implements Serializable {
                 this.activityId = activityId;
             }
 
-            public Object getCreatedAt() {
+            public String getCreatedAt() {
                 return createdAt;
             }
 
-            public void setCreatedAt(Object createdAt) {
+            public void setCreatedAt(String createdAt) {
                 this.createdAt = createdAt;
             }
 

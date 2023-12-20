@@ -26,7 +26,7 @@ public class InterviewQuestionDTO extends Model<InterviewQuestionDTO> {
     //问题回答
     private String response;
     //知识类型,先默认0,后面再区分
-    private Integer questionType;
+    private String questionType;
     //创建时间
     private Date createTime;
     //逻辑删除,0未删除,1已删除

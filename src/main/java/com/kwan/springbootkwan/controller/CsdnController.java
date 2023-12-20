@@ -75,7 +75,7 @@ public class CsdnController {
         return Result.ok("单人三连完成");
     }
 
-    @ApiOperation(value = "多人三连", nickname = "多人三连")
+    @ApiOperation(value = "根据用户名多人三连", nickname = "根据用户名多人三连")
     @PostMapping("/multiTriplet")
     public Result multiTriplet(@RequestBody List<String> userNames) {
         if (CollectionUtil.isNotEmpty(userNames)) {
@@ -83,7 +83,7 @@ public class CsdnController {
                 singleTriplet(userName);
             }
         }
-        return Result.ok("多人三连完成");
+        return Result.ok("根据用户名多人三连完成");
     }
 
     @ApiOperation(value = "全员三连", nickname = "全员三连")

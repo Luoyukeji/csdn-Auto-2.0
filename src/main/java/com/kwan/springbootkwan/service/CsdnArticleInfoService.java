@@ -8,12 +8,7 @@ import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 
 import java.util.List;
 
-/**
- * csdn文章信息(CsdnArticleInfo)表服务接口
- *
- * @author makejava
- * @since 2023-10-28 01:58:46
- */
+
 public interface CsdnArticleInfoService extends IService<CsdnArticleInfo> {
     /**
      * 通过文章id获取文章信息
@@ -30,12 +25,29 @@ public interface CsdnArticleInfoService extends IService<CsdnArticleInfo> {
     void saveArticle(CsdnArticleInfo csdnArticleInfo);
 
     /**
+     * 获取最新的1篇文章
+     *
+     * @param username
+     * @return
+     */
+    BusinessInfoResponse.ArticleData.Article getArticle(String username);
+
+    /**
      * 获取最新的10篇文章
      *
      * @param username
      * @return
      */
     List<BusinessInfoResponse.ArticleData.Article> getArticles10(String username);
+
+    /**
+     * 获取n篇文章
+     *
+     * @param username
+     * @param number
+     * @return
+     */
+    List<BusinessInfoResponse.ArticleData.Article> getArticlesN(String username, Integer number);
 
     /**
      * 获取最新的100篇文章

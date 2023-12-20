@@ -33,26 +33,6 @@ public class AlgorithmicProblemController {
     private AlgorithmicProblemService algorithmicProblemService;
 
     /**
-     * 获取面试题的种类的数量
-     *
-     * @return
-     */
-    @GetMapping("/questionType")
-    public Result questionType() {
-        return Result.ok(this.algorithmicProblemService.questionType());
-    }
-
-    /**
-     * 获取面试题的种类的数量
-     *
-     * @return
-     */
-    @GetMapping("/allQuestionType")
-    public Result allQuestionType() {
-        return Result.ok(this.algorithmicProblemService.allQuestionType());
-    }
-
-    /**
      * 分页查询所有数据
      *
      * @return 所有数据
@@ -61,13 +41,14 @@ public class AlgorithmicProblemController {
     public Result selectAll(@RequestParam Integer page
             , @RequestParam Integer pageSize
             , @RequestParam String questionName
-            , @RequestParam Integer questionType) {
+            , @RequestParam String questionType) {
         Page<AlgorithmicProblem> pageParm = new Page<>();
         pageParm.setCurrent(page);
         pageParm.setSize(pageSize);
         QueryWrapper<AlgorithmicProblem> wrapper = new QueryWrapper<>();
         wrapper.orderByDesc("id");
-        if (questionType != 0) {
+
+        if (StringUtils.isNotEmpty(questionType)) {
             wrapper.eq("question_type", questionType);
         }
         wrapper.eq("is_delete", 0);

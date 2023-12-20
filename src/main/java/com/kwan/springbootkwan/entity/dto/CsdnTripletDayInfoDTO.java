@@ -11,6 +11,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -35,6 +36,17 @@ public class CsdnTripletDayInfoDTO extends Model<CsdnTripletDayInfoDTO> {
     private Integer collectStatus;
     @ApiModelProperty("评论状态")
     private Integer commentStatus;
+
+    @ApiModelProperty("每日金额")
+    private BigDecimal myAmount = BigDecimal.ZERO;
+    @ApiModelProperty("红包个数")
+    private Integer redPackageCount = 0;
+    @ApiModelProperty("日平均金额")
+    private BigDecimal averageDaily = BigDecimal.ZERO;
+    @ApiModelProperty("丢包个数")
+    private Integer loseRedPackageCount = 0;
+    @ApiModelProperty("理论最大金额")
+    private BigDecimal theoryAmount = BigDecimal.ZERO;
 
     @ApiModelProperty("创建时间")
     private Date createTime;

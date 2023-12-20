@@ -7,13 +7,7 @@ import com.kwan.springbootkwan.entity.csdn.MessageResponse;
 
 import java.util.List;
 
-/**
- * 私信相关
- *
- * @author : qinyingjie
- * @version : 2.2.0
- * @date : 2023/11/9 23:58
- */
+
 public interface CsdnMessageService extends IService<CsdnHistorySession> {
     /**
      * 分页查询私信列表
@@ -55,7 +49,7 @@ public interface CsdnMessageService extends IService<CsdnHistorySession> {
     Boolean haveRepliedMessage(String fromUsername, String blogUrl);
 
     /**
-     * 根据username回复私信
+     * 根据用户名回复私信
      *
      * @param username
      */
@@ -68,4 +62,13 @@ public interface CsdnMessageService extends IService<CsdnHistorySession> {
      * @return
      */
     CsdnHistorySession getCsdnHistorySession(String username);
+
+    /**
+     * 发送红包私信
+     *
+     * @param userName
+     * @param nickName
+     * @param shareUrl
+     */
+    void sendRedPacketNotice(String userName, String nickName, String shareUrl);
 }

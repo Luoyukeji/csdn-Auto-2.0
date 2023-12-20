@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kwan.springbootkwan.mapper.CsdnAccountManagementMapper">
+
+    <select id="totalInfo" resultType="com.kwan.springbootkwan.entity.dto.CsdnAccountTotalDTO">
+        SELECT operate_type AS operateType
+             , SUM(amount)  AS amount
+        FROM csdn_account_management
+        GROUP BY operateType
+    </select>
+</mapper>

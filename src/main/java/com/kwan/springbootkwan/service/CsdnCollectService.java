@@ -5,13 +5,7 @@ import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 
-/**
- * 收藏
- *
- * @author : qinyingjie
- * @version : 2.2.0
- * @date : 2023/10/24 01:00
- */
+
 public interface CsdnCollectService {
 
     /**

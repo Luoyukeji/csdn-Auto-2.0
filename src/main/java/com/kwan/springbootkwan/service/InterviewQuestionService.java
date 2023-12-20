@@ -20,13 +20,6 @@ public interface InterviewQuestionService extends IService<InterviewQuestion> {
      * @return
      */
     boolean uploadFile(String path);
-
-    /**
-     * 获取面试题的种类
-     *
-     * @return
-     */
-    List<InterviewQuestionTypeDTO> questionType();
     /**
      * 获取所有的类型
      *

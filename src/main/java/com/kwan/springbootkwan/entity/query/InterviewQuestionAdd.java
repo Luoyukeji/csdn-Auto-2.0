@@ -6,5 +6,5 @@ import lombok.Data;
 public class InterviewQuestionAdd {
     private Integer addType;
     private String question;
-    private Integer questionType;
+    private String questionType;
 }

@@ -13,6 +13,7 @@ import com.kwan.springbootkwan.entity.csdn.CommentResponse;
 import com.kwan.springbootkwan.service.CsdnArticleInfoService;
 import com.kwan.springbootkwan.service.CsdnAutoReplyService;
 import com.kwan.springbootkwan.service.CsdnCommentService;
+import com.kwan.springbootkwan.service.CsdnMessageService;
 import com.kwan.springbootkwan.service.CsdnService;
 import com.kwan.springbootkwan.service.CsdnUserInfoService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,19 +39,21 @@ public class CsdnAutoReplyServiceImpl implements CsdnAutoReplyService {
     @Autowired
     private CsdnService csdnService;
     @Autowired
-    private CsdnArticleInfoService csdnArticleInfoService;
+    private CsdnMessageService csdnMessageService;
     @Autowired
     private CsdnCommentService csdnCommentService;
     @Autowired
     private CsdnUserInfoService csdnUserInfoService;
+    @Autowired
+    private CsdnArticleInfoService csdnArticleInfoService;
+
 
     @Override
     public void commentSelf() {
-        List<BusinessInfoResponse.ArticleData.Article> list = csdnArticleInfoService.getArticles10(selfUserName);
+        List<BusinessInfoResponse.ArticleData.Article> list = csdnArticleInfoService.getArticlesN(selfUserName, 3);
         if (CollectionUtil.isNotEmpty(list)) {
             for (BusinessInfoResponse.ArticleData.Article article : list) {
                 final String type = article.getType();
-                //只处理博客类型
                 if (StringUtils.equals(CommonConstant.ARTICLE_TYPE_BLOG, type)) {
                     String articleId = article.getUrl().substring(article.getUrl().lastIndexOf("/") + 1);
                     String url = commentListUrl + articleId;
@@ -62,9 +65,8 @@ public class CsdnAutoReplyServiceImpl implements CsdnAutoReplyService {
                             .execute();
                     final String body = response.body();
                     ObjectMapper objectMapper = new ObjectMapper();
-                    CommentListResponse articleInfo;
                     try {
-                        articleInfo = objectMapper.readValue(body, CommentListResponse.class);
+                        CommentListResponse articleInfo = objectMapper.readValue(body, CommentListResponse.class);
                         final CommentListResponse.DataInfo data = articleInfo.getData();
                         final List<CommentListResponse.Comment> otherCommentList = data.getList();
                         if (CollectionUtil.isNotEmpty(otherCommentList)) {
@@ -92,21 +94,24 @@ public class CsdnAutoReplyServiceImpl implements CsdnAutoReplyService {
                                         CommentResponse reply = csdnCommentService.dealComment(articleId, "感谢" + nickName + "大佬支持！" + selfReply[temp_count], commentId);
                                         log.info(reply.toString());
                                     }
-                                    //三连此评论人,不需要回复的时候,也要去三连别人
-                                    CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(userName);
-                                    if (Objects.isNull(csdnUserInfo)) {
-                                        //新增用户
-                                        csdnUserInfo = new CsdnUserInfo();
-                                        csdnUserInfo.setUserName(userName);
-                                        csdnUserInfo.setNickName(nickName);
-                                        csdnUserInfo.setLikeStatus(0);
-                                        csdnUserInfo.setCollectStatus(0);
-                                        csdnUserInfo.setCommentStatus(0);
-                                        csdnUserInfo.setUserWeight(7);
-                                        csdnUserInfo.setUserHomeUrl("https://blog.csdn.net/" + userName);
-                                        csdnUserInfoService.save(csdnUserInfo);
+                                    final List<BusinessInfoResponse.ArticleData.Article> articles10 = csdnArticleInfoService.getArticles10(userName);
+                                    if (CollectionUtil.isNotEmpty(articles10)) {
+                                        CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(userName);
+                                        if (Objects.isNull(csdnUserInfo)) {
+                                            //新增用户
+                                            csdnUserInfo = new CsdnUserInfo();
+                                            csdnUserInfo.setUserName(userName);
+                                            csdnUserInfo.setNickName(nickName);
+                                            csdnUserInfo.setLikeStatus(0);
+                                            csdnUserInfo.setCollectStatus(0);
+                                            csdnUserInfo.setCommentStatus(0);
+                                            csdnUserInfo.setUserWeight(7);
+                                            csdnUserInfo.setUserHomeUrl("https://blog.csdn.net/" + userName);
+                                            csdnUserInfoService.save(csdnUserInfo);
+                                        }
+                                        csdnService.singleArticle(csdnUserInfo);
+                                        csdnMessageService.dealMessageByUserName(userName);
                                     }
-                                    csdnService.singleArticle(csdnUserInfo);
                                 }
                             }
                         }

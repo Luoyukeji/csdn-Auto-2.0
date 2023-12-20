@@ -1,8 +1,5 @@
 package com.kwan.springbootkwan.constant;
 
-import io.swagger.annotations.ApiModel;
-
-@ApiModel("常量管理类")
 public class CommonConstant {
     /**
      * 成功
@@ -17,8 +14,22 @@ public class CommonConstant {
      */
     public static final int SC_JEECG_NO_AUTHZ = 401;
     /**
-     * 文章类型
+     * 文章类型-博客类型
      */
     public static final String ARTICLE_TYPE_BLOG = "blog";
+
+    /**
+     * 余额相关
+     */
+    public static class AccountInfo {
+        /**
+         * X_CA_KEY
+         */
+        public static final String X_CA_KEY = "203796071";
+        /**
+         * E_KEY
+         */
+        public static final String E_KEY = "i5rbx2z2ivnxzidzpfc0z021imsp2nec";
+    }
 
 }

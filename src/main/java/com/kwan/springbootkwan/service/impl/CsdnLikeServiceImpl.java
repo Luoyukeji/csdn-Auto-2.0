@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class CsdnLikeServiceImpl implements CsdnLikeService {
+
     @Value("${csdn.cookie}")
     private String csdnCookie;
     @Value("${csdn.url.like_url}")

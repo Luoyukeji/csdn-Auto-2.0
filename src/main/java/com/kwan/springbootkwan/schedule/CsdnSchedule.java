@@ -7,8 +7,10 @@ import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
+import com.kwan.springbootkwan.service.CsdnAccountManagementService;
 import com.kwan.springbootkwan.service.CsdnArticleInfoService;
 import com.kwan.springbootkwan.service.CsdnAutoReplyService;
+import com.kwan.springbootkwan.service.CsdnFollowFansInfoService;
 import com.kwan.springbootkwan.service.CsdnLikeCollectService;
 import com.kwan.springbootkwan.service.CsdnMessageService;
 import com.kwan.springbootkwan.service.CsdnService;
@@ -27,7 +29,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class CsdnSchedule {
-
     @Value("${csdn.self_user_name}")
     private String selfUserName;
     @Autowired
@@ -38,15 +39,20 @@ public class CsdnSchedule {
     private CsdnUserInfoService csdnUserInfoService;
     @Autowired
     private CsdnAutoReplyService csdnAutoReplyService;
+
     @Autowired
     private CsdnArticleInfoService csdnArticleInfoService;
     @Autowired
     private CsdnLikeCollectService csdnLikeCollectService;
     @Autowired
+    private CsdnFollowFansInfoService csdnFollowFansInfoService;
+    @Autowired
     private CsdnTripletDayInfoService csdnTripletDayInfoService;
+    @Autowired
+    private CsdnAccountManagementService csdnAccountManagementService;
 
-    @ApiOperation(value = "自动三连+自动回复评论", nickname = "自动三连+自动回复评论")
-    @Scheduled(cron = "0 0 6,12,23 * * ?")
+    @ApiOperation(value = "自动回复评论+自动给给我点赞的的三连并私信+处理私信", nickname = "自动回复评论+自动给给我点赞的的三连并私信+处理私信")
+    @Scheduled(cron = "0 0 6,13,23 * * ?")
     public void allTripletAndCommentSelf() {
         log.info("allTripletAndCommentSelf task is running ... ...");
         csdnAutoReplyService.commentSelf();
@@ -56,7 +62,7 @@ public class CsdnSchedule {
     }
 
     @ApiOperation(value = "检查用户是否发布新的文章", nickname = "检查用户是否发布新的文章")
-    @Scheduled(cron = "0 0/30 8,11,15,21,23 * * ?")
+    @Scheduled(cron = "0 0/30 6,21,23 * * ?")
     public void resetAllCurrentStatus() {
         log.info("resetAllCurrentStatus task is running ... ...");
         //用户可能有新的文章,更新用户的状态
@@ -84,7 +90,7 @@ public class CsdnSchedule {
         this.resetAllCurrentStatus();
         //重置文章状态
         LambdaQueryWrapper<CsdnArticleInfo> wrapper = new LambdaQueryWrapper<>();
-        wrapper.and(QueryWrapper -> QueryWrapper.eq(
+        wrapper.and(queryWrapper -> queryWrapper.eq(
                 CsdnArticleInfo::getLikeStatus, 0)
                 .or().eq(CsdnArticleInfo::getLikeStatus, 2)
                 .or().eq(CsdnArticleInfo::getCommentStatus, 0)
@@ -105,6 +111,11 @@ public class CsdnSchedule {
         if (CollectionUtil.isNotEmpty(articles)) {
             csdnService.autoAddView(articles);
         }
+        csdnFollowFansInfoService.saveFans();
+        csdnFollowFansInfoService.saveFollow();
+        csdnFollowFansInfoService.deleteFollow();
+        csdnFollowFansInfoService.deleteNoArticle();
+        csdnAccountManagementService.addAccountInfo();
         log.info("resetTripletDayInfo task is finish ... ...");
     }
 
@@ -123,4 +134,10 @@ public class CsdnSchedule {
         }
         log.info("frequentlyComment task is finish ... ...");
     }
+
+
+
+
+
+
 }

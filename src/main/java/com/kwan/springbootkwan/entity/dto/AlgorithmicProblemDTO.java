@@ -3,7 +3,6 @@ package com.kwan.springbootkwan.entity.dto;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.kwan.springbootkwan.entity.AlgorithmicProblem;
 import com.kwan.springbootkwan.mapstruct.FromConverter;
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -11,9 +10,14 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.Date;
 
-
+/**
+ * 面试题(InterviewQuestion)表实体类
+ *
+ * @author makejava
+ * @since 2023-09-08 16:31:53
+ */
 @Data
-@ApiModel("面试题DTO")
+@SuppressWarnings("serial")
 public class AlgorithmicProblemDTO extends Model<AlgorithmicProblemDTO> {
     /**
      * 主键id
@@ -26,7 +30,7 @@ public class AlgorithmicProblemDTO extends Model<AlgorithmicProblemDTO> {
     /**
      * 类型
      */
-    private Integer questionType;
+    private String questionType;
     /**
      * 1~10的分值
      */

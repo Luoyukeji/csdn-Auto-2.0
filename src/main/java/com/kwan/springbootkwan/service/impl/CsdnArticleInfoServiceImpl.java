@@ -92,11 +92,71 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
     }
 
     @Override
+    public BusinessInfoResponse.ArticleData.Article getArticle(String username) {
+        HttpResponse response = HttpUtil.createGet(url)
+                .header("Cookie", csdnCookie)
+                .form("page", 1)
+                .form("size", 10)
+                .form("businessType", "lately")
+                .form("noMore", false)
+                .form("username", username)
+                .execute();
+        final String body = response.body();
+        ObjectMapper objectMapper = new ObjectMapper();
+        BusinessInfoResponse businessInfoResponse;
+        List<BusinessInfoResponse.ArticleData.Article> list = null;
+        try {
+            businessInfoResponse = objectMapper.readValue(body, BusinessInfoResponse.class);
+            final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
+            list = data.getList();
+            if (CollectionUtil.isNotEmpty(list)) {
+
+                for (BusinessInfoResponse.ArticleData.Article article : list) {
+                    final String type = article.getType();
+                    if (StringUtils.equals(type, "blog")) {
+                        return article;
+                    }
+                }
+            }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     public List<BusinessInfoResponse.ArticleData.Article> getArticles10(String username) {
         HttpResponse response = HttpUtil.createGet(url)
                 .header("Cookie", csdnCookie)
                 .form("page", 1)
                 .form("size", 10)
+                .form("businessType", "lately")
+                .form("noMore", false)
+                .form("username", username)
+                .execute();
+        final String body = response.body();
+        ObjectMapper objectMapper = new ObjectMapper();
+        BusinessInfoResponse businessInfoResponse;
+        List<BusinessInfoResponse.ArticleData.Article> list = null;
+        try {
+            businessInfoResponse = objectMapper.readValue(body, BusinessInfoResponse.class);
+            final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
+            list = data.getList();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        if (CollectionUtil.isEmpty(list)) {
+            return null;
+        }
+        return list;
+    }
+
+    @Override
+    public List<BusinessInfoResponse.ArticleData.Article> getArticlesN(String username, Integer number) {
+        HttpResponse response = HttpUtil.createGet(url)
+                .header("Cookie", csdnCookie)
+                .form("page", 1)
+                .form("size", number)
                 .form("businessType", "lately")
                 .form("noMore", false)
                 .form("username", username)
@@ -251,11 +311,11 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
             for (BusinessInfoResponse.ArticleData.Article article : blogs) {
                 final String type = article.getType();
                 if (StringUtils.equals(type, CommonConstant.ARTICLE_TYPE_BLOG)) {
-                    CsdnArticleInfo csdnArticleInfo = this.getArticleByArticleId(article.getArticleId().toString());
+                    CsdnArticleInfo csdnArticleInfo = this.getArticleByArticleId(article.getArticleId());
                     if (Objects.isNull(csdnArticleInfo)) {
                         csdnArticleInfo = new CsdnArticleInfo();
                         final String url = article.getUrl();
-                        csdnArticleInfo.setArticleId(article.getArticleId().toString());
+                        csdnArticleInfo.setArticleId(article.getArticleId());
                         csdnArticleInfo.setArticleUrl(url);
                         csdnArticleInfo.setArticleTitle(article.getTitle());
                         csdnArticleInfo.setArticleDescription(article.getDescription());
@@ -329,7 +389,7 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
                                 csdnArticleInfo.setArticleId(articleId);
                                 final String url = article.getUrl();
                                 csdnArticleInfo.setArticleUrl(url);
-                                csdnArticleInfo.setArticleScore(getArticleScore(url));
+                                csdnArticleInfo.setArticleScore(this.getArticleScore(url));
                                 csdnArticleInfo.setArticleTitle(article.getTitle());
                                 csdnArticleInfo.setArticleDescription(article.getDescription());
                                 csdnArticleInfo.setUserName(selfUserName);
@@ -396,8 +456,7 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
                             .header("accept-language", "zh-CN,zh;q=0.9,en;q=0.8")
                             .body(jsonCollectInfo)
                             .execute();
-                    csdnArticleInfo.setIsDelete(1);
-                    this.updateById(csdnArticleInfo);
+                    this.removeById(csdnArticleInfo);
                 }
             }
         } catch (Exception e) {

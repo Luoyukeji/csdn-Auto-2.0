@@ -18,6 +18,12 @@ public interface CsdnTripletDayInfoService extends IService<CsdnTripletDayInfo> 
      * @return
      */
     CsdnTripletDayInfo todayInfo();
+   /**
+     * 获取新的一天的三连统计数据
+     *
+     * @return
+     */
+    void addAll();
 
     /**
      * 重置三连管理的星期字段

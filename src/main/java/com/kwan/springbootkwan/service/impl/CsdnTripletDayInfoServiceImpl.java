@@ -1,6 +1,7 @@
 package com.kwan.springbootkwan.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.Week;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -25,7 +27,6 @@ public class CsdnTripletDayInfoServiceImpl extends ServiceImpl<CsdnTripletDayInf
         Date currentDate = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
         String formattedDate = sdf.format(currentDate);
-        log.info("当前日期是:{}", formattedDate);
         QueryWrapper<CsdnTripletDayInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("is_delete", 0);
         wrapper.eq("triplet_date", formattedDate);
@@ -41,6 +42,45 @@ public class CsdnTripletDayInfoServiceImpl extends ServiceImpl<CsdnTripletDayInf
             this.save(csdnTripletDayInfo);
         }
         return one;
+    }
+
+    private List<String> days() {
+        List<String> dates = new ArrayList<>();
+        final DateTime yesterdayDate = DateUtil.yesterday();
+        final String yesterday = DateUtil.formatDate(yesterdayDate);
+        dates.add(yesterday);
+        for (int i = 1; i < 29; i++) {
+            final DateTime dateTime = DateUtil.offsetDay(yesterdayDate, -i);
+            dates.add(DateUtil.formatDate(dateTime));
+        }
+        return dates;
+    }
+
+
+    @Override
+    public void addAll() {
+        final List<String> days = this.days();
+        for (int i = days.size() - 1; i >= 0; i--) {
+            final String dateStr = days.get(i);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                Date date = dateFormat.parse(dateStr);
+                QueryWrapper<CsdnTripletDayInfo> wrapper = new QueryWrapper<>();
+                wrapper.eq("is_delete", 0);
+                wrapper.eq("triplet_date", dateStr);
+                final CsdnTripletDayInfo one = this.getOne(wrapper);
+                if (Objects.isNull(one)) {
+                    CsdnTripletDayInfo csdnTripletDayInfo = new CsdnTripletDayInfo();
+                    csdnTripletDayInfo.setTripletDate(date);
+                    Week dayOfWeek = DateUtil.dayOfWeekEnum(date);
+                    String uppercaseDayOfWeek = dayOfWeek.toChinese("星期");
+                    csdnTripletDayInfo.setWeekInfo(uppercaseDayOfWeek);
+                    this.save(csdnTripletDayInfo);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

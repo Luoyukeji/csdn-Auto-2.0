@@ -5,12 +5,12 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kwan.springbootkwan.constant.CommonConstant;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.csdn.LikeCollectQuery;
 import com.kwan.springbootkwan.entity.csdn.LikeCollectResponse;
 import com.kwan.springbootkwan.service.CsdnArticleInfoService;
+import com.kwan.springbootkwan.service.CsdnFollowFansInfoService;
 import com.kwan.springbootkwan.service.CsdnLikeCollectService;
 import com.kwan.springbootkwan.service.CsdnMessageService;
 import com.kwan.springbootkwan.service.CsdnService;
@@ -24,11 +24,11 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class CsdnLikeCollectServiceImpl implements CsdnLikeCollectService {
+
     @Value("${csdn.cookie}")
     private String csdnCookie;
     @Autowired
@@ -39,6 +39,8 @@ public class CsdnLikeCollectServiceImpl implements CsdnLikeCollectService {
     private CsdnUserInfoService csdnUserInfoService;
     @Autowired
     private CsdnArticleInfoService csdnArticleInfoService;
+    @Autowired
+    private CsdnFollowFansInfoService csdnFollowFansInfoService;
 
     @Override
     public List<LikeCollectResponse.LikeCollectDataDetail.ResultList> acquireLikeCollect() {
@@ -90,47 +92,48 @@ public class CsdnLikeCollectServiceImpl implements CsdnLikeCollectService {
                     final String[] names = usernames.split(",");
                     for (int i = 0; i < names.length; i++) {
                         String name = names[i];
-                        CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(name);
-                        if (Objects.nonNull(csdnUserInfo)) {
-                            //如果是多人,则无法判断是否是粉丝,不能发送私信
+                        final String nicknames = content.getNicknames();
+                        String nickName = name;
+                        if (StringUtils.isNotEmpty(nicknames)) {
+                            nickName = names[i];
+                        }
+                        final List<BusinessInfoResponse.ArticleData.Article> articles10 = csdnArticleInfoService.getArticles10(name);
+                        if (CollectionUtil.isNotEmpty(articles10)) {
+                            CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(name);
+                            if (Objects.isNull(csdnUserInfo)) {
+                                csdnUserInfo = new CsdnUserInfo();
+                                csdnUserInfo.setUserName(name);
+                                csdnUserInfo.setNickName(nickName);
+                                csdnUserInfo.setLikeStatus(0);
+                                csdnUserInfo.setCollectStatus(0);
+                                csdnUserInfo.setCommentStatus(0);
+                                csdnUserInfo.setUserWeight(7);
+                                csdnUserInfo.setUserHomeUrl("https://blog.csdn.net/" + name);
+                                csdnUserInfoService.save(csdnUserInfo);
+                            }
                             csdnService.singleArticle(csdnUserInfo);
+                            csdnMessageService.dealMessageByUserName(name);
                         }
                     }
                 } else {
                     final String username = content.getUsername();
-                    CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(username);
-                    if (Objects.nonNull(csdnUserInfo)) {
+                    final String nickname = content.getNickname();
+                    final List<BusinessInfoResponse.ArticleData.Article> articles10 = csdnArticleInfoService.getArticles10(username);
+                    if (CollectionUtil.isNotEmpty(articles10)) {
+                        CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(username);
+                        if (Objects.isNull(csdnUserInfo)) {
+                            csdnUserInfo = new CsdnUserInfo();
+                            csdnUserInfo.setUserName(username);
+                            csdnUserInfo.setNickName(nickname);
+                            csdnUserInfo.setLikeStatus(0);
+                            csdnUserInfo.setCollectStatus(0);
+                            csdnUserInfo.setCommentStatus(0);
+                            csdnUserInfo.setUserWeight(7);
+                            csdnUserInfo.setUserHomeUrl("https://blog.csdn.net/" + username);
+                            csdnUserInfoService.save(csdnUserInfo);
+                        }
                         csdnService.singleArticle(csdnUserInfo);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 三连并且私信
-     *
-     * @param name
-     * @param nick
-     * @param isFans 是粉丝才私信
-     */
-    private void threeAndMessages(String name, String nick, boolean isFans) {
-        CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(name);
-        if (Objects.nonNull(csdnUserInfo)) {
-            List<BusinessInfoResponse.ArticleData.Article> blogs10 = csdnArticleInfoService.getArticles10(name);
-            if (CollectionUtil.isNotEmpty(blogs10)) {
-                blogs10 = blogs10.stream().filter(x -> x.getType().equals(CommonConstant.ARTICLE_TYPE_BLOG)).collect(Collectors.toList());
-                if (CollectionUtil.isNotEmpty(blogs10)) {
-                    final BusinessInfoResponse.ArticleData.Article article = blogs10.get(0);
-                    final String url = article.getUrl();
-                    if (isFans && !csdnMessageService.haveRepliedMessage(name, url)) {
-                        final String title = article.getTitle();
-                        String messageBody = "恭喜" + nick + "大佬发布佳作\uD83C\uDF89\uD83C\uDF89\uD83C\uDF89\n" +
-                                "✨" + title + "✨\n" +
-                                "\uD83D\uDD25 " + url + "\n" +
-                                "已一键三连，欢迎大佬回访。☕☕☕";
-                        csdnMessageService.replyMessage(name, 0, messageBody, "WEB", "10_20285116700–1699412958190–182091", "CSDN-PC");
-                        csdnMessageService.messageRead(name);
+                        csdnMessageService.dealMessageByUserName(username);
                     }
                 }
             }
