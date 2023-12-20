@@ -95,7 +95,7 @@ CREATE TABLE `csdn_follow_fans_info`
 (
     `id`            int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `user_name`     varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '用户名',
-    `nick_name`     varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '昵称',
+    `nick_name`     varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '昵称',
     `blog_url`      varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '主页',
     `relation_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  DEFAULT NULL COMMENT '关系类型',
     `post_time`     timestamp NULL DEFAULT NULL COMMENT '发布时间',
