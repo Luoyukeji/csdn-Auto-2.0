@@ -15,6 +15,7 @@ public class LikeCollectResponse {
     public static class LikeCollectDataDetail {
         public Integer countNum;
         public Object hasUnRead;
+        public Object isTop;
         public Integer unReadCount;
         public List<ResultList> resultList;
 
