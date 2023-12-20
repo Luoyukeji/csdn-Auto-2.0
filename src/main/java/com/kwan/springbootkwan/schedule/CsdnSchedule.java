@@ -39,7 +39,6 @@ public class CsdnSchedule {
     private CsdnUserInfoService csdnUserInfoService;
     @Autowired
     private CsdnAutoReplyService csdnAutoReplyService;
-
     @Autowired
     private CsdnArticleInfoService csdnArticleInfoService;
     @Autowired
@@ -134,10 +133,4 @@ public class CsdnSchedule {
         }
         log.info("frequentlyComment task is finish ... ...");
     }
-
-
-
-
-
-
 }
