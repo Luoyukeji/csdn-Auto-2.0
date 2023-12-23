@@ -50,7 +50,7 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
     @Override
     public void saveFollow() {
         final List<CsdnFollowFansInfo> all = this.getAll();
-        if (CollectionUtil.isNotEmpty(all) && all.size() >= 1500) {
+        if (CollectionUtil.isNotEmpty(all)) {
             Integer fanId = this.getFollowId();
             while (Objects.nonNull(fanId)) {
                 fanId = this.saveWithFollowId(fanId);
