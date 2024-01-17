@@ -21,9 +21,9 @@ csdn:
   self_folder_id: 34345345  #自己的收藏夹id
   auto_add_view_count: 2000  #刷浏览量数量
   auto_comment_count: 40  #评论个数
-  #自己的评论
+  #给别人的评论
   self_comment: xxxxxx;xxxxxx;xxxxxx;xxxxxx
-  #自动评论
+  #自动回复评论
   self_reply: xxxxxx;xxxxxx;xxxxxx;xxxxxx
   #cookie
   cookie: "g_Id_click=278; dc_tos=s3egtp"
