@@ -13,10 +13,16 @@ public class CommonConstant {
      * 未认证
      */
     public static final int SC_JEECG_NO_AUTHZ = 401;
+
     /**
-     * 文章类型-博客类型
+     * 博客类型
      */
-    public static final String ARTICLE_TYPE_BLOG = "blog";
+    public static class BlogType {
+        /**
+         * article
+         */
+        public static final String BLOG = "blog";
+    }
 
     /**
      * 余额相关

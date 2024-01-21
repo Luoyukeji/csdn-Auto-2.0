@@ -5,13 +5,13 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.csdn.CommentListResponse;
 import com.kwan.springbootkwan.entity.csdn.CommentResponse;
 import com.kwan.springbootkwan.enums.CommentStatus;
-import com.kwan.springbootkwan.service.CsdnCommentService;
+import com.kwan.springbootkwan.service.CsdnArticleCommentService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,7 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-public class CsdnCommentServiceImpl implements CsdnCommentService {
+public class CsdnArticleCommentServiceImpl implements CsdnArticleCommentService {
 
     @Value("${csdn.cookie}")
     private String csdnCookie;
@@ -37,9 +37,8 @@ public class CsdnCommentServiceImpl implements CsdnCommentService {
 
 
     @Override
-    public Boolean isComment(BusinessInfoResponse.ArticleData.Article article, CsdnUserInfo csdnUserInfo) {
-        final String urlInfo = article.getUrl();
-        String articleId = urlInfo.substring(urlInfo.lastIndexOf("/") + 1);
+    public Boolean isComment(CsdnArticleInfo csdnArticleInfo, CsdnUserInfo csdnUserInfo) {
+        final String articleId = csdnArticleInfo.getArticleId();
         String url = commentListUrl + articleId;
         HttpResponse response = HttpUtil.createPost(url)
                 .header("Cookie", csdnCookie)
@@ -57,7 +56,7 @@ public class CsdnCommentServiceImpl implements CsdnCommentService {
                 for (CommentListResponse.Comment comment : list) {
                     final CommentListResponse.Info info = comment.getInfo();
                     final String userName = info.getUserName();
-                    if (StringUtils.equals(userName, selfUserName)) {
+                    if (StringUtils.equalsIgnoreCase(userName, selfUserName)) {
                         log.info("文章{}已经评论过", articleId);
                         csdnUserInfo.setCommentStatus(CommentStatus.HAVE_ALREADY_COMMENT.getCode());
                         return true;
@@ -73,7 +72,6 @@ public class CsdnCommentServiceImpl implements CsdnCommentService {
 
     @Override
     public Boolean comment(String articleId, CsdnUserInfo csdnUserInfo, CsdnTripletDayInfo csdnTripletDayInfo) {
-        //评论
         int start = -1;
         int end = selfComment.length;
         int temp_count = (int) (Math.floor(Math.random() * (start - end + 1)) + end);
@@ -103,7 +101,7 @@ public class CsdnCommentServiceImpl implements CsdnCommentService {
     }
 
     /**
-     * 评论文章
+     * 回复评论
      *
      * @param articleId
      * @return
@@ -111,26 +109,26 @@ public class CsdnCommentServiceImpl implements CsdnCommentService {
     @Override
     public CommentResponse dealComment(String articleId, String commentInfo, Integer commentId) {
         HttpResponse response;
-        if (Objects.nonNull(commentId)) {
-            response = HttpUtil.createPost(commentUrl)
-                    .header("Cookie", csdnCookie)
-                    .form("articleId", articleId)
-                    .form("content", commentInfo)
-                    .form("commentId", commentId)
-                    .execute();
-        } else {
-            response = HttpUtil.createPost(commentUrl)
-                    .header("Cookie", csdnCookie)
-                    .form("articleId", articleId)
-                    .form("content", commentInfo)
-                    .execute();
-        }
-
-        final String body = response.body();
-        log.info(body);
-        ObjectMapper objectMapper = new ObjectMapper();
         CommentResponse commentResponse = null;
         try {
+            if (Objects.nonNull(commentId)) {
+                response = HttpUtil.createPost(commentUrl)
+                        .header("Cookie", csdnCookie)
+                        .form("articleId", articleId)
+                        .form("content", commentInfo)
+                        .form("commentId", commentId)
+                        .execute();
+            } else {
+                response = HttpUtil.createPost(commentUrl)
+                        .header("Cookie", csdnCookie)
+                        .form("articleId", articleId)
+                        .form("content", commentInfo)
+                        .execute();
+            }
+
+            final String body = response.body();
+            log.info(body);
+            ObjectMapper objectMapper = new ObjectMapper();
             commentResponse = objectMapper.readValue(body, CommentResponse.class);
         } catch (JsonProcessingException e) {
             e.printStackTrace();

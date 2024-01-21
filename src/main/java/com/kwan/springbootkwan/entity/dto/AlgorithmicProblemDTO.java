@@ -52,6 +52,10 @@ public class AlgorithmicProblemDTO extends Model<AlgorithmicProblemDTO> {
      */
     private String leetcodeLink;
     /**
+     * 标签
+     */
+    private String tag;
+    /**
      * 创建时间
      */
     private Date createTime;

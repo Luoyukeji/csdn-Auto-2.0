@@ -1,28 +1,27 @@
 package com.kwan.springbootkwan.service;
 
-
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnHistorySession;
-import com.kwan.springbootkwan.entity.csdn.MessageResponse;
+import com.kwan.springbootkwan.entity.CsdnUserInfo;
 
 import java.util.List;
 
-
 public interface CsdnMessageService extends IService<CsdnHistorySession> {
+
     /**
-     * 分页查询私信列表
+     * 查询私信列表
      *
      * @return
      */
-    List<MessageResponse.MessageData.Sessions> acquireMessage();
-
+    List<CsdnUserInfo> acquireMessage();
 
     /**
      * 处理私信列表
      *
      * @param acquireMessage
      */
-    void dealMessage(List<MessageResponse.MessageData.Sessions> acquireMessage);
+    void sendMessage( CsdnArticleInfo csdnArticleInfo );
 
     /**
      * 回复私信
@@ -46,14 +45,14 @@ public interface CsdnMessageService extends IService<CsdnHistorySession> {
     /**
      * 是否回复过私信
      */
-    Boolean haveRepliedMessage(String fromUsername, String blogUrl);
+    Boolean haveRepliedMessage(String userName, String url);
 
     /**
      * 根据用户名回复私信
      *
-     * @param username
+     * @param csdnArticleInfo
      */
-    void dealMessageByUserName(String username);
+    void dealMessageByUserName(CsdnArticleInfo csdnArticleInfo);
 
     /**
      * 获取私信人信息

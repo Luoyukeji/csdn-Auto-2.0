@@ -5,12 +5,11 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.csdn.LikeCollectQuery;
 import com.kwan.springbootkwan.entity.csdn.LikeCollectResponse;
 import com.kwan.springbootkwan.service.CsdnArticleInfoService;
-import com.kwan.springbootkwan.service.CsdnFollowFansInfoService;
 import com.kwan.springbootkwan.service.CsdnLikeCollectService;
 import com.kwan.springbootkwan.service.CsdnMessageService;
 import com.kwan.springbootkwan.service.CsdnService;
@@ -39,8 +38,6 @@ public class CsdnLikeCollectServiceImpl implements CsdnLikeCollectService {
     private CsdnUserInfoService csdnUserInfoService;
     @Autowired
     private CsdnArticleInfoService csdnArticleInfoService;
-    @Autowired
-    private CsdnFollowFansInfoService csdnFollowFansInfoService;
 
     @Override
     public List<LikeCollectResponse.LikeCollectDataDetail.ResultList> acquireLikeCollect() {
@@ -91,49 +88,27 @@ public class CsdnLikeCollectServiceImpl implements CsdnLikeCollectService {
                 if (StringUtils.isNotEmpty(usernames)) {
                     final String[] names = usernames.split(",");
                     for (int i = 0; i < names.length; i++) {
-                        String name = names[i];
+                        String userName = names[i];
                         final String nicknames = content.getNicknames();
-                        String nickName = name;
+                        String nickName = userName;
                         if (StringUtils.isNotEmpty(nicknames)) {
                             nickName = names[i];
                         }
-                        final List<BusinessInfoResponse.ArticleData.Article> articles10 = csdnArticleInfoService.getArticles10(name);
-                        if (CollectionUtil.isNotEmpty(articles10)) {
-                            CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(name);
-                            if (Objects.isNull(csdnUserInfo)) {
-                                csdnUserInfo = new CsdnUserInfo();
-                                csdnUserInfo.setUserName(name);
-                                csdnUserInfo.setNickName(nickName);
-                                csdnUserInfo.setLikeStatus(0);
-                                csdnUserInfo.setCollectStatus(0);
-                                csdnUserInfo.setCommentStatus(0);
-                                csdnUserInfo.setUserWeight(7);
-                                csdnUserInfo.setUserHomeUrl("https://blog.csdn.net/" + name);
-                                csdnUserInfoService.save(csdnUserInfo);
-                            }
-                            csdnService.singleArticle(csdnUserInfo);
-                            csdnMessageService.dealMessageByUserName(name);
+                        final CsdnArticleInfo articleInfo = csdnArticleInfoService.getArticle(nickName, userName);
+                        CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserInfo(userName, nickName);
+                        if (Objects.nonNull(articleInfo) && Objects.nonNull(csdnUserInfo)) {
+                            csdnService.tripletByArticle(csdnUserInfo, articleInfo);
+                            csdnMessageService.dealMessageByUserName(articleInfo);
                         }
                     }
                 } else {
-                    final String username = content.getUsername();
-                    final String nickname = content.getNickname();
-                    final List<BusinessInfoResponse.ArticleData.Article> articles10 = csdnArticleInfoService.getArticles10(username);
-                    if (CollectionUtil.isNotEmpty(articles10)) {
-                        CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(username);
-                        if (Objects.isNull(csdnUserInfo)) {
-                            csdnUserInfo = new CsdnUserInfo();
-                            csdnUserInfo.setUserName(username);
-                            csdnUserInfo.setNickName(nickname);
-                            csdnUserInfo.setLikeStatus(0);
-                            csdnUserInfo.setCollectStatus(0);
-                            csdnUserInfo.setCommentStatus(0);
-                            csdnUserInfo.setUserWeight(7);
-                            csdnUserInfo.setUserHomeUrl("https://blog.csdn.net/" + username);
-                            csdnUserInfoService.save(csdnUserInfo);
-                        }
-                        csdnService.singleArticle(csdnUserInfo);
-                        csdnMessageService.dealMessageByUserName(username);
+                    final String nickName = content.getNickname();
+                    final String userName = content.getUsername();
+                    final CsdnArticleInfo articleInfo = csdnArticleInfoService.getArticle(nickName, userName);
+                    CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserInfo(userName, nickName);
+                    if (Objects.nonNull(articleInfo) && Objects.nonNull(csdnUserInfo)) {
+                        csdnService.tripletByArticle(csdnUserInfo, articleInfo);
+                        csdnMessageService.dealMessageByUserName(articleInfo);
                     }
                 }
             }

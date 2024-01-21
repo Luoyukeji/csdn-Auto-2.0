@@ -8,8 +8,6 @@ import lombok.Data;
 @Data
 @ApiModel("csdn三连监控总信息返回DTO")
 public class CsdnTripletDayInfoAllDTO {
-    @ApiModelProperty("当前选择日期的概览情况")
-    private CsdnSevenDayRedPackageDTO csdnSevenDayRedPackageDTO;
     @ApiModelProperty("日三连监控分页信息")
     private PageBean<CsdnTripletDayInfoDTO> from;
 }

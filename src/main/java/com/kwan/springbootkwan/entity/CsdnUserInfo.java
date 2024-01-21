@@ -29,6 +29,8 @@ public class CsdnUserInfo extends Model<CsdnUserInfo> implements Serializable {
     private Integer userWeight;
     @ApiModelProperty("用户主页")
     private String userHomeUrl;
+    @ApiModelProperty("当前文章")
+    private String currBlogUrl;
     @ApiModelProperty("文章类型")
     private String articleType;
     @ApiModelProperty("创建时间")

@@ -7,6 +7,7 @@ import com.kwan.springbootkwan.entity.Chatbot;
 import com.kwan.springbootkwan.entity.Result;
 import com.kwan.springbootkwan.entity.dto.ChatbotDTO;
 import com.kwan.springbootkwan.service.ChatbotService;
+import io.swagger.annotations.Api;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,28 +25,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-/**
- * (Chatbot)表控制层
- *
- * @author : qinyingjie
- * @version : 2.2.0
- * @date : 2023/7/11 18:04
- */
+@Api(tags = "chatgpt问答查询api")
 @RestController
 @RequestMapping("chatbot")
 public class ChatbotController {
-    /**
-     * 服务对象
-     */
+
     @Resource
     private ChatbotService chatbotService;
 
-    /**
-     * 获取所有数据
-     *
-     * @return
-     */
     @GetMapping
     public Result selectAll() {
 
@@ -54,12 +41,6 @@ public class ChatbotController {
         return Result.ok(list);
     }
 
-
-    /**
-     * 分页查询所有数据,本地缓存的使用
-     *
-     * @return 所有数据
-     */
 //    @Cacheable("chatbot-cache")
     @GetMapping("/page")
     public Result selectAll(@RequestParam Integer page
@@ -77,45 +58,22 @@ public class ChatbotController {
         return Result.ok(ChatbotDTO.Converter.INSTANCE.from(this.chatbotService.page(pageParm, wrapper)));
     }
 
-    /**
-     * 通过主键查询单条数据
-     *
-     * @param id 主键
-     * @return 单条数据
-     */
     @GetMapping("{id}")
     public Result selectOne(@PathVariable Serializable id) {
         return Result.ok(this.chatbotService.getById(id));
     }
 
-    /**
-     * 新增数据
-     *
-     * @param chatbot 实体对象
-     * @return 新增结果
-     */
     @PostMapping
     public Result insert(@RequestBody Chatbot chatbot) {
         return Result.ok(this.chatbotService.save(chatbot));
     }
 
-    /**
-     * 修改数据
-     *
-     * @param chatbot 实体对象
-     * @return 修改结果
-     */
     @PutMapping
     public Result update(@RequestBody Chatbot chatbot) {
         return Result.ok(this.chatbotService.updateById(chatbot));
     }
 
-    /**
-     * 删除数据
-     *
-     * @param idList 主键结合
-     * @return 删除结果
-     */
+
     @DeleteMapping
     public Result delete(@RequestParam("idList") List<Long> idList) {
         return Result.ok(this.chatbotService.removeByIds(idList));
@@ -130,4 +88,3 @@ public class ChatbotController {
         return Result.ok(chatbotService.update(chatbot, wrapper));
     }
 }
-

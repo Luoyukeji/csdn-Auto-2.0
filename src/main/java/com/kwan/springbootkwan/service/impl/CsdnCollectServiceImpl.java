@@ -4,9 +4,10 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kwan.springbootkwan.constant.CommonConstant;
+import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.csdn.CollectInfoQuery;
 import com.kwan.springbootkwan.entity.csdn.CollectResponse;
 import com.kwan.springbootkwan.entity.csdn.IsCollectResponse;
@@ -64,27 +65,26 @@ public class CsdnCollectServiceImpl implements CsdnCollectService {
     }
 
     @Override
-    public Boolean collect(BusinessInfoResponse.ArticleData.Article article, CsdnUserInfo csdnUserInfo, CsdnTripletDayInfo csdnTripletDayInfo) {
+    public Boolean collect(CsdnArticleInfo csdnArticleInfo, CsdnUserInfo csdnUserInfo, CsdnTripletDayInfo csdnTripletDayInfo) {
+        final String articleId = csdnArticleInfo.getArticleId();
         final String userName = csdnUserInfo.getUserName();
         final Integer collectStatus = csdnUserInfo.getCollectStatus();
         if (CollectStatus.HAVE_ALREADY_COLLECT.getCode().equals(collectStatus) || CollectStatus.COLLECT_IS_FULL.getCode().equals(collectStatus)) {
             return true;
         }
-        final String urlInfo = article.getUrl();
-        String articleId = urlInfo.substring(urlInfo.lastIndexOf("/") + 1);
         CollectResponse collectResponse = null;
         try {
             CollectInfoQuery collectInfoQuery = new CollectInfoQuery();
             collectInfoQuery.setSourceId(Integer.valueOf(articleId));
             collectInfoQuery.setFromType("PC");
             collectInfoQuery.setAuthor(userName);
-            collectInfoQuery.setDescription(article.getDescription());
-            collectInfoQuery.setSource("blog");
+            collectInfoQuery.setDescription(csdnArticleInfo.getArticleDescription());
+            collectInfoQuery.setSource(CommonConstant.BlogType.BLOG);
             List<Integer> list = new ArrayList<>();
             list.add(selfFolderId);
             collectInfoQuery.setFolderIdList(list);
-            collectInfoQuery.setTitle(article.getTitle());
-            collectInfoQuery.setUrl(article.getUrl());
+            collectInfoQuery.setTitle(csdnArticleInfo.getArticleTitle());
+            collectInfoQuery.setUrl(csdnArticleInfo.getArticleUrl());
             collectInfoQuery.setUsername(selfUserName);
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonCollectInfo = objectMapper.writeValueAsString(collectInfoQuery);

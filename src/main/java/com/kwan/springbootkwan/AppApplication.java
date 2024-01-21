@@ -9,9 +9,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableScheduling
 @SpringBootApplication
 public class AppApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(AppApplication.class, args);
-        System.out.println("------------------vue-springboot-kwan应用启动成功--------------------");
+        System.out.println("------------------vue-springboot-kwan-start-Successful--------------------");
     }
 }

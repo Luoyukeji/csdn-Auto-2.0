@@ -2,7 +2,6 @@ package com.kwan.springbootkwan.service;
 
 import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 
 import java.util.List;
 
@@ -15,30 +14,27 @@ import java.util.List;
  */
 public interface CsdnService {
 
-    /**
-     * 单人三连
-     *
-     * @return
-     */
-    void singleArticle(CsdnUserInfo csdnUserInfo);
 
     /**
      * 多人三连
+     *
+     * @param csdnUserInfos
      */
-    void allTriplet();
+    void extractSingleArticle(List<CsdnUserInfo> csdnUserInfos);
+
 
     /**
      * 根据文章三连
      *
      * @param csdnUserInfo
-     * @param article
+     * @param csdnArticleInfo
      */
-    void tripletByArticle(CsdnUserInfo csdnUserInfo, BusinessInfoResponse.ArticleData.Article article, CsdnArticleInfo csdnArticleInfo);
+    void tripletByArticle(CsdnUserInfo csdnUserInfo, CsdnArticleInfo csdnArticleInfo);
 
     /**
      * 自刷流量
      */
-    void autoAddView(List<BusinessInfoResponse.ArticleData.Article> articles);
+    void autoAddView(List<CsdnArticleInfo> articles);
 
     /**
      * 根据url刷流量
@@ -46,4 +42,9 @@ public interface CsdnService {
      * @param url
      */
     void autoAddViewByUrl(String url);
+
+    /**
+     * 处理私信三连
+     */
+    void dealTriplet();
 }

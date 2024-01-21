@@ -8,6 +8,7 @@ import com.kwan.springbootkwan.entity.Result;
 import com.kwan.springbootkwan.entity.dto.AphorismPoetryDTO;
 import com.kwan.springbootkwan.entity.query.AphorismPoetryQuery;
 import com.kwan.springbootkwan.service.AphorismPoetryService;
+import io.swagger.annotations.Api;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,26 +20,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
-/**
- * 名言警句(AphorismPoetry)表控制层
- *
- * @author makejava
- * @since 2023-10-09 11:13:12
- */
+@Api(tags = "励志短句api")
 @RestController
 @RequestMapping("aphorismPoetry")
 public class AphorismPoetryController {
-    /**
-     * 服务对象
-     */
+
     @Resource
     private AphorismPoetryService aphorismPoetryService;
 
-    /**
-     * 分页查询所有数据
-     *
-     * @return 所有数据
-     */
+
     @GetMapping("/page")
     public Result selectAll(@RequestParam Integer page
             , @RequestParam Integer pageSize
@@ -55,9 +45,7 @@ public class AphorismPoetryController {
         return Result.ok(AphorismPoetryDTO.Converter.INSTANCE.from(this.aphorismPoetryService.page(pageParm, wrapper)));
     }
 
-    /**
-     * 随机一题
-     */
+
     @GetMapping("/random")
     public Result random() {
         QueryWrapper<AphorismPoetry> wrapper = new QueryWrapper<>();
@@ -66,11 +54,6 @@ public class AphorismPoetryController {
         return Result.ok(AphorismPoetryDTO.Converter.INSTANCE.from(this.aphorismPoetryService.getOne(wrapper)));
     }
 
-    /**
-     * 新增问题
-     *
-     * @return 所有数据
-     */
     @PostMapping("/add")
     public Result add(@RequestBody AphorismPoetryQuery poetryQuery) {
         final Integer addType = poetryQuery.getAddType();
@@ -114,12 +97,6 @@ public class AphorismPoetryController {
         return Result.ok();
     }
 
-    /**
-     * 更新面试题
-     *
-     * @param query
-     * @return
-     */
     @PostMapping("/update")
     public Result update(@RequestBody AphorismPoetryQuery query) {
         AphorismPoetry aphorismPoetry = new AphorismPoetry();
@@ -127,12 +104,6 @@ public class AphorismPoetryController {
         return Result.ok(this.aphorismPoetryService.updateById(aphorismPoetry));
     }
 
-    /**
-     * 删除面试题
-     *
-     * @param id
-     * @return
-     */
     @GetMapping("/delete")
     public Result delete(@RequestParam("id") Integer id) {
         AphorismPoetry aphorismPoetry = new AphorismPoetry();

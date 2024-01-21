@@ -1,9 +1,9 @@
 package com.kwan.springbootkwan.service;
 
 
+import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 
 
 public interface CsdnCollectService {
@@ -20,5 +20,5 @@ public interface CsdnCollectService {
      *
      * @return
      */
-    Boolean collect(BusinessInfoResponse.ArticleData.Article article, CsdnUserInfo csdnUserInfo, CsdnTripletDayInfo csdnTripletDayInfo);
+    Boolean collect(CsdnArticleInfo csdnArticleInfo, CsdnUserInfo csdnUserInfo, CsdnTripletDayInfo csdnTripletDayInfo);
 }

@@ -4,14 +4,16 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
+import com.kwan.springbootkwan.constant.CommonConstant;
+import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.Result;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.dto.CsdnUserInfoDTO;
 import com.kwan.springbootkwan.entity.query.CsdnUserInfoQuery;
+import com.kwan.springbootkwan.enums.CommentStatus;
+import com.kwan.springbootkwan.enums.LikeStatus;
 import com.kwan.springbootkwan.service.CsdnArticleInfoService;
-import com.kwan.springbootkwan.service.CsdnTripletDayInfoService;
+import com.kwan.springbootkwan.service.CsdnService;
 import com.kwan.springbootkwan.service.CsdnUserInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,13 +36,12 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/csdn/user")
 public class CsdnUserController {
-
+    @Autowired
+    private CsdnService csdnService;
     @Autowired
     private CsdnUserInfoService csdnUserInfoService;
     @Autowired
     private CsdnArticleInfoService csdnArticleInfoService;
-    @Autowired
-    private CsdnTripletDayInfoService csdnTripletDayInfoService;
 
     @ApiOperation(value = "分页查询所有数据", nickname = "分页查询所有数据")
     @PostMapping("/page")
@@ -114,25 +115,28 @@ public class CsdnUserController {
     @ApiOperation(value = "修正用户的点赞评论状态", nickname = "修正用户的点赞评论状态")
     @GetMapping("/fixUserLikesStatus")
     public Result fixUserLikesStatus() {
-        final CsdnTripletDayInfo csdnTripletDayInfo = csdnTripletDayInfoService.todayInfo();
         LambdaQueryWrapper<CsdnUserInfo> wrapper = new LambdaQueryWrapper<>();
         wrapper.and(QueryWrapper -> QueryWrapper.eq(
-                CsdnUserInfo::getLikeStatus, 0)
-                .or().eq(CsdnUserInfo::getLikeStatus, 2)
-                .or().eq(CsdnUserInfo::getCommentStatus, 0)
-                .or().eq(CsdnUserInfo::getCommentStatus, 2)
-                .or().eq(CsdnUserInfo::getCommentStatus, 3)
-                .or().eq(CsdnUserInfo::getCommentStatus, 4)
-                .or().eq(CsdnUserInfo::getCommentStatus, 5))
+                                CsdnUserInfo::getLikeStatus, 0)
+                        .or().eq(CsdnUserInfo::getLikeStatus, 2)
+                        .or().eq(CsdnUserInfo::getCommentStatus, 0)
+                        .or().eq(CsdnUserInfo::getCommentStatus, 2)
+                        .or().eq(CsdnUserInfo::getCommentStatus, 3)
+                        .or().eq(CsdnUserInfo::getCommentStatus, 4)
+                        .or().eq(CsdnUserInfo::getCommentStatus, 5))
                 .eq(CsdnUserInfo::getIsDelete, 0);
         final List<CsdnUserInfo> list = csdnUserInfoService.list(wrapper);
         if (CollectionUtil.isNotEmpty(list)) {
             for (CsdnUserInfo csdnUserInfo : list) {
+                final String nickName = csdnUserInfo.getNickName();
                 final String userName = csdnUserInfo.getUserName();
-                final List<BusinessInfoResponse.ArticleData.Article> articles = csdnArticleInfoService.getArticles10(userName);
-                if (CollectionUtil.isNotEmpty(articles)) {
-                    final BusinessInfoResponse.ArticleData.Article article = articles.get(0);
-                    csdnUserInfoService.checkUserStatus(csdnTripletDayInfo, csdnUserInfo, article);
+                final CsdnArticleInfo articleInfo = csdnArticleInfoService.getArticle(nickName, userName);
+                if (Objects.nonNull(articleInfo)) {
+                    csdnUserInfo.setArticleType(CommonConstant.BlogType.BLOG);
+                    csdnUserInfo.setLikeStatus(LikeStatus.UN_PROCESSED.getCode());
+                    csdnUserInfo.setCollectStatus(CommentStatus.UN_PROCESSED.getCode());
+                    csdnUserInfo.setCommentStatus(CommentStatus.UN_PROCESSED.getCode());
+                    csdnUserInfoService.updateById(csdnUserInfo);
                 }
             }
         }
@@ -142,14 +146,15 @@ public class CsdnUserController {
     @ApiOperation(value = "重置指定人员新博客状态", nickname = "重置指定人员新博客状态")
     @GetMapping("/resetCsdnUserInfo")
     public Result resetCsdnUserInfo(@Param("username") String username) {
-        final CsdnTripletDayInfo csdnTripletDayInfo = csdnTripletDayInfoService.todayInfo();
         CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(username);
         if (Objects.nonNull(csdnUserInfo)) {
+            final String nickName = csdnUserInfo.getNickName();
             final String userName = csdnUserInfo.getUserName();
-            final List<BusinessInfoResponse.ArticleData.Article> articles = csdnArticleInfoService.getArticles10(userName);
-            if (CollectionUtil.isNotEmpty(articles)) {
-                final BusinessInfoResponse.ArticleData.Article article = articles.get(0);
-                csdnUserInfoService.checkUserStatus(csdnTripletDayInfo, csdnUserInfo, article);
+            final CsdnArticleInfo articleInfo = csdnArticleInfoService.getArticle(nickName, userName);
+            if (Objects.nonNull(articleInfo)) {
+                csdnUserInfo.setArticleType(CommonConstant.BlogType.BLOG);
+                csdnService.tripletByArticle(csdnUserInfo, articleInfo);
+                csdnUserInfoService.updateById(csdnUserInfo);
             }
         }
         return Result.ok("重置指定人员新博客状态完成");
@@ -170,7 +175,11 @@ public class CsdnUserController {
     @GetMapping("/add10Blog")
     public Result add10Blog(@Param("username") String username) {
         final CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(username);
-        csdnArticleInfoService.add10Blog(username, csdnUserInfo);
+        if (Objects.nonNull(csdnUserInfo)) {
+            String nickName = csdnUserInfo.getUserName();
+            String userName = csdnUserInfo.getNickName();
+            csdnArticleInfoService.getArticles10(nickName, userName);
+        }
         return Result.ok("给指定人员添加10篇博客完成");
     }
 }

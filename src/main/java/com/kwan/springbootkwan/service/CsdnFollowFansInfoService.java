@@ -53,11 +53,6 @@ public interface CsdnFollowFansInfoService extends IService<CsdnFollowFansInfo> 
     void deleteFollowStart23();
 
     /**
-     * 互关用户最新发布时间更新
-     */
-    void updatePostTime();
-
-    /**
      * 获取通知发红包的用户
      *
      * @return
@@ -83,5 +78,12 @@ public interface CsdnFollowFansInfoService extends IService<CsdnFollowFansInfo> 
      * @return
      */
     List<CsdnFollowFansInfo> getConcernCorrelation();
+
+    /**
+     * 获取所有互关
+     *
+     * @return
+     */
+    List<CsdnFollowFansInfo> allIntercorrelation();
 }
 

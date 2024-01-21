@@ -1,3 +1,4 @@
+#秦英杰的号
 server:
   port: 80
   compression:
@@ -10,25 +11,25 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://xxxxxx:3306/kwan?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://43.xxxx.xxxx.xxx:3306/kwan?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     username: root
-    password: xxxxxx
+    password: xxxx
 
 #csdn设置
 csdn:
-  self_user_name: "xxxx"  #自己的用户id
-  self_user_nick_name: "xxxx"  #自己的昵称
-  self_folder_id: 34345345  #自己的收藏夹id
+  self_user_name: "xxx"  #csdn自己的用户id
+  self_user_nick_name: "xxx"  #csdn自己的昵称
+  self_folder_id: 1234  #csdn自己的收藏夹id
   auto_add_view_count: 2000  #刷浏览量数量
+  red_package_count: 1  #红包抢位
   auto_comment_count: 40  #评论个数
   #给别人的评论
-  self_comment: xxxxxx;xxxxxx;xxxxxx;xxxxxx
-  #自动回复评论
-  self_reply: xxxxxx;xxxxxx;xxxxxx;xxxxxx
-  #cookie
-  cookie: "g_Id_click=278; dc_tos=s3egtp"
+  self_comment: xxxx;xxxx;xxxx
+  #自动回复别人给我的评论
+  self_reply: xxxx;xxxx;xxxx
+  #身份验证
+  cookie: "xxxxxxxxxxxxxxxx"
   url:
-    user_article_url: "https://blog.csdn.net/community/home-api/v1/get-business-list" #获取用户文章接口
     is_collect_url: "https://blog.csdn.net/phoenix/web/v1/isCollect" #是否收藏接口
     add_collect_url: "https://mp-action.csdn.net/interact/wrapper/pc/favorite/v1/api/addFavoriteInFolds" #添加收藏接口
     is_comment_list_url: "https://blog.csdn.net/phoenix/web/v1/comment/list/"  #查询评论接口

@@ -30,6 +30,7 @@ import java.util.Objects;
 @RequestMapping("/dayInfo")
 public class CsdnTripletDayInfoController {
 
+
     @Autowired
     private CsdnTripletDayInfoService csdnTripletDayInfoService;
 
@@ -72,6 +73,7 @@ public class CsdnTripletDayInfoController {
             wrapper.eq("week_info", weekInfo);
         }
         wrapper.orderByDesc("triplet_date");
+
         final PageBean<CsdnTripletDayInfoDTO> from = CsdnTripletDayInfoDTO.Converter.INSTANCE.from(this.csdnTripletDayInfoService.page(pageParm, wrapper));
         response.setFrom(from);
         return Result.ok(response);

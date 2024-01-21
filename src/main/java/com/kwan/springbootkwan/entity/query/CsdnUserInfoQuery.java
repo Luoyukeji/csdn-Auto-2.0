@@ -26,6 +26,8 @@ public class CsdnUserInfoQuery extends BasePage {
     private String articleType;
     @ApiModelProperty("用户主页")
     private String userHomeUrl;
+    @ApiModelProperty("当前文章")
+    private String currBlogUrl;
     @ApiModelProperty("添加类型")
     private Integer addType;
 }

@@ -29,7 +29,7 @@ public enum CommentStatus {
     /**
      * 评论已经到了49条
      */
-    COMMENT_NUM_49(5, "当日评论已经到了45条"),
+    COMMENT_NUM_40(5, "评论已到40条"),
     /**
      * 其他错误
      */

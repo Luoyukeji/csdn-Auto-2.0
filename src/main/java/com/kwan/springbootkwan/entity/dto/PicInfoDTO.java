@@ -1,15 +1,18 @@
-package com.kwan.springbootkwan.entity;
+package com.kwan.springbootkwan.entity.dto;
 
-import com.baomidou.mybatisplus.extension.activerecord.Model;
-import io.swagger.annotations.ApiModel;
+import com.kwan.springbootkwan.entity.PicInfo;
+import com.kwan.springbootkwan.mapstruct.FromConverter;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
 
 import java.util.Date;
 
+
 @Data
-@ApiModel("图片信息实体类")
-public class PicInfo extends Model<PicInfo> {
+public class PicInfoDTO {
     @ApiModelProperty("主键id")
     private Integer id;
     @ApiModelProperty("图片名称")
@@ -22,4 +25,9 @@ public class PicInfo extends Model<PicInfo> {
     private Date createTime;
     @ApiModelProperty("删除标识")
     private Integer isDelete;
+
+    @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    public interface Converter extends FromConverter<PicInfoDTO, PicInfo> {
+        Converter INSTANCE = Mappers.getMapper(Converter.class);
+    }
 }

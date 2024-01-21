@@ -4,15 +4,12 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.kwan.springbootkwan.constant.CommonConstant;
 import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.Result;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.dto.CsdnArticleInfoDTO;
 import com.kwan.springbootkwan.entity.query.CsdnArticleInfoQuery;
-import com.kwan.springbootkwan.entity.query.CsdnUserInfoQuery;
 import com.kwan.springbootkwan.service.CsdnArticleInfoService;
 import com.kwan.springbootkwan.service.CsdnService;
 import com.kwan.springbootkwan.service.CsdnTripletDayInfoService;
@@ -21,6 +18,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,9 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Api(tags = "csdn文章管理")
@@ -51,6 +46,7 @@ public class CsdnArticleInfoController {
     private CsdnArticleInfoService csdnArticleInfoService;
     @Resource
     private CsdnTripletDayInfoService csdnTripletDayInfoService;
+
 
     @ApiOperation(value = "分页查询所有数据", nickname = "分页查询所有数据")
     @PostMapping("/page")
@@ -100,53 +96,21 @@ public class CsdnArticleInfoController {
         return Result.ok(CsdnArticleInfoDTO.Converter.INSTANCE.from(this.csdnArticleInfoService.page(pageParm, wrapper)));
     }
 
+
     @ApiOperation(value = "新增文章", nickname = "新增文章")
     @PostMapping("/add")
     public Result add(@RequestBody CsdnArticleInfoQuery addInfo) {
+        final String nickName = addInfo.getNickName();
         final String userName = addInfo.getUserName();
         final String articleId = addInfo.getArticleId();
         if (StringUtils.isNotEmpty(userName) && StringUtils.isNotEmpty(articleId)) {
-            List<BusinessInfoResponse.ArticleData.Article> articles = this.csdnArticleInfoService.getArticles10(userName);
-            articles = articles.stream().filter(x -> x.getType().equals(CommonConstant.ARTICLE_TYPE_BLOG)).collect(Collectors.toList());
-            if (CollectionUtil.isNotEmpty(articles)) {
-                for (BusinessInfoResponse.ArticleData.Article article : articles) {
-                    final String editUrl = article.getEditUrl();
-                    // 定义正则表达式
-                    String pattern = "articleId=(\\d+)";
-                    Pattern r = Pattern.compile(pattern);
-                    // 创建匹配器
-                    Matcher m = r.matcher(editUrl);
-                    // 查找匹配
-                    if (m.find()) {
-                        // 获取匹配到的值
-                        String articleIdInfo = m.group(1);
-                        if (articleId.equals(articleIdInfo)) {
-                            //首先查询用户
-                            CsdnUserInfoQuery addUserInfo = new CsdnUserInfoQuery();
-                            addUserInfo.setUserName(userName);
-                            addUserInfo.setAddType(0);
-                            csdnUserInfoService.add(addUserInfo);
-                            CsdnArticleInfo csdnArticleInfo = this.csdnArticleInfoService.getArticleByArticleId(articleId);
-                            if (csdnArticleInfo == null) {
-                                csdnArticleInfo = new CsdnArticleInfo();
-                                final String url = article.getUrl();
-                                csdnArticleInfo.setArticleId(articleId);
-                                csdnArticleInfo.setUserName(userName);
-                                csdnArticleInfo.setArticleTitle(article.getTitle());
-                                csdnArticleInfo.setArticleDescription(article.getDescription());
-                                csdnArticleInfo.setArticleUrl(url);
-                                csdnArticleInfo.setNickName(addUserInfo.getNickName());
-                                if (StringUtils.equals(selfUserName, userName)) {
-                                    csdnArticleInfo.setIsMyself(1);
-                                }
-                                //查询质量分数
-                                csdnArticleInfo.setArticleScore(csdnArticleInfoService.getScore(url));
-                                this.csdnArticleInfoService.saveArticle(csdnArticleInfo);
-                            }
-                            break;
-                        }
+            CsdnArticleInfo csdnArticleInfo = csdnArticleInfoService.getArticleByArticleId(articleId);
+            if (Objects.isNull(csdnArticleInfo)) {
+                final List<CsdnArticleInfo> articles10 = csdnArticleInfoService.getArticles10(nickName, userName);
+                for (CsdnArticleInfo articleInfo : articles10) {
+                    if (StringUtils.equals(articleInfo.getArticleId(), articleId)) {
+                        log.info("新增文章添加成功");
                     }
-
                 }
             }
         }
@@ -174,11 +138,18 @@ public class CsdnArticleInfoController {
         return Result.ok("删除文章成功");
     }
 
+    @ApiOperation(value = "根据用户昵称和用户名查询博客", nickname = "根据用户昵称和用户名查询博客")
+    @GetMapping("/searchNickName")
+    public Result searchNickName(@Param("nickName") String nickName, @Param("userName") String userName) {
+        CsdnArticleInfo csdnArticleInfo = csdnArticleInfoService.getArticle(nickName, userName);
+        return Result.ok(csdnArticleInfo);
+    }
+
     @ApiOperation(value = "单篇文章三连", nickname = "单篇文章三连")
     @GetMapping("/triplet")
     public Result triplet(@RequestParam("articleId") Integer articleId) {
         final CsdnArticleInfo csdnArticleInfo = this.csdnArticleInfoService.getArticleByArticleId(articleId.toString());
-        if (csdnArticleInfo != null) {
+        if (Objects.nonNull(csdnArticleInfo)) {
             final Integer articleScore = csdnArticleInfo.getArticleScore();
             if (articleScore == 0) {
                 csdnArticleInfo.setArticleScore(csdnArticleInfoService.getScore(csdnArticleInfo.getArticleUrl()));
@@ -188,11 +159,7 @@ public class CsdnArticleInfoController {
             if (isMyself == 0) {
                 final String userName = csdnArticleInfo.getUserName();
                 CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(userName);
-                BusinessInfoResponse.ArticleData.Article article = new BusinessInfoResponse.ArticleData.Article();
-                article.setDescription(csdnArticleInfo.getArticleDescription());
-                article.setTitle(csdnArticleInfo.getArticleTitle());
-                article.setUrl(csdnArticleInfo.getArticleUrl());
-                csdnService.tripletByArticle(csdnUserInfo, article, csdnArticleInfo);
+                csdnService.tripletByArticle(csdnUserInfo, csdnArticleInfo);
             }
         }
         return Result.ok("单篇文章三连完成");
@@ -228,13 +195,13 @@ public class CsdnArticleInfoController {
         final CsdnTripletDayInfo csdnTripletDayInfo = csdnTripletDayInfoService.todayInfo();
         LambdaQueryWrapper<CsdnArticleInfo> wrapper = new LambdaQueryWrapper<>();
         wrapper.and(QueryWrapper -> QueryWrapper.eq(
-                CsdnArticleInfo::getLikeStatus, 0)
-                .or().eq(CsdnArticleInfo::getLikeStatus, 2)
-                .or().eq(CsdnArticleInfo::getCommentStatus, 0)
-                .or().eq(CsdnArticleInfo::getCommentStatus, 2)
-                .or().eq(CsdnArticleInfo::getCommentStatus, 3)
-                .or().eq(CsdnArticleInfo::getCommentStatus, 4)
-                .or().eq(CsdnArticleInfo::getCommentStatus, 5))
+                                CsdnArticleInfo::getLikeStatus, 0)
+                        .or().eq(CsdnArticleInfo::getLikeStatus, 2)
+                        .or().eq(CsdnArticleInfo::getCommentStatus, 0)
+                        .or().eq(CsdnArticleInfo::getCommentStatus, 2)
+                        .or().eq(CsdnArticleInfo::getCommentStatus, 3)
+                        .or().eq(CsdnArticleInfo::getCommentStatus, 4)
+                        .or().eq(CsdnArticleInfo::getCommentStatus, 5))
                 .eq(CsdnArticleInfo::getIsDelete, 0);
         final List<CsdnArticleInfo> list = csdnArticleInfoService.list(wrapper);
         if (CollectionUtil.isNotEmpty(list)) {
@@ -245,7 +212,6 @@ public class CsdnArticleInfoController {
         }
         return Result.ok("修正文章的点赞评论状态完成");
     }
-
 
     @ApiOperation(value = "查看某一文章的阅读量", nickname = "查看某一文章的阅读量")
     @GetMapping("/getViewCount")

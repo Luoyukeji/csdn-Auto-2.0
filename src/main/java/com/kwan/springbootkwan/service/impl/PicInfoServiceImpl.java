@@ -13,7 +13,10 @@ import com.kwan.springbootkwan.service.PicInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -24,13 +27,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
-/**
- * 图片信息表(PicInfo)表服务实现类
- *
- * @author makejava
- * @since 2023-08-09 12:44:03
- */
+
 @Slf4j
 @Service
 public class PicInfoServiceImpl extends ServiceImpl<PicInfoMapper, PicInfo> implements PicInfoService {
@@ -43,7 +42,7 @@ public class PicInfoServiceImpl extends ServiceImpl<PicInfoMapper, PicInfo> impl
     private static final String PRE_FIX = "https://gitcode.net/qyj19920704/baby-images/-/raw/main/";
 
     @Override
-    public boolean insertByPath(String path, Integer type) {
+    public boolean insertByPath(String path, String type) {
         Path directoryPath = Paths.get(path);
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directoryPath)) {
             for (Path filePath : directoryStream) {
@@ -71,7 +70,7 @@ public class PicInfoServiceImpl extends ServiceImpl<PicInfoMapper, PicInfo> impl
      * @param picPath
      * @param picName
      */
-    private void insertPic(Integer type, String picPath, String picName) {
+    private void insertPic(String type, String picPath, String picName) {
         QueryWrapper<PicInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("pic_url", picPath);
         wrapper.eq("is_delete", 0);
@@ -87,7 +86,7 @@ public class PicInfoServiceImpl extends ServiceImpl<PicInfoMapper, PicInfo> impl
     }
 
     @Override
-    public boolean insertByBaiduUrl(String url, Integer type) {
+    public boolean insertByBaiduUrl(String url, String type) {
         HttpResponse response;
         try {
             response = HttpUtil.createGet(url).execute();
@@ -133,8 +132,8 @@ public class PicInfoServiceImpl extends ServiceImpl<PicInfoMapper, PicInfo> impl
                     file.transferTo(serverFile);
                     pic = new PicInfo();
                     pic.setPicName(fileNameWithoutExtension);
-                    pic.setPicUrl("https://www.qinyingjie.top/img/" + file.getOriginalFilename());
-                    pic.setType(0);
+                    pic.setPicUrl("http://43.139.90.182/img/" + file.getOriginalFilename());
+                    pic.setType("宝宝");
                     this.save(pic);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -142,6 +141,61 @@ public class PicInfoServiceImpl extends ServiceImpl<PicInfoMapper, PicInfo> impl
                 }
             }
         }
+    }
+
+    public static void main(String[] args) {
+
+    }
+
+    private static long getUUIDRandomPart(UUID uuid) {
+        // 获取UUID的128位数值中的高64位作为随机数部分
+        return uuid.getMostSignificantBits();
+    }
+
+    private MultipartFile convert(String imageUrl) throws IOException {
+        // 使用RestTemplate获取图片字节数组
+        RestTemplate restTemplate = new RestTemplate();
+        byte[] imageBytes = restTemplate.getForObject(imageUrl, byte[].class);
+        // 将字节数组封装为ByteArrayResource
+        ByteArrayResource byteArrayResource = new ByteArrayResource(Objects.requireNonNull(imageBytes));
+        // 创建MockMultipartFile对象
+        // 生成UUID
+        UUID uuid = UUID.randomUUID();
+        // 提取UUID中的随机数部分
+        long randomPart = getUUIDRandomPart(uuid);
+        return new MockMultipartFile("file", randomPart + ".jpg", "image/jpeg", byteArrayResource.getInputStream());
+    }
+
+    @Override
+    public String uploadByUrl(String imgUrl) {
+        try {
+            final MultipartFile file = this.convert(imgUrl);
+            log.info("handleFileUpload() called with: file= {}", file.getOriginalFilename());
+            if (file.isEmpty()) {
+                return null;
+            }
+            String fileNameWithoutExtension = this.getFileNameWithoutExtension(file.getOriginalFilename());
+            PicInfo pic = this.getPicByName(fileNameWithoutExtension);
+            if (Objects.isNull(pic)) {
+                try {
+                    String uploadDir = "/kwan/img/";
+//                    String uploadDir = "/Users/qinyingjie/Downloads/";
+                    File dir = new File(uploadDir);
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
+                    File serverFile = new File(uploadDir + file.getOriginalFilename());
+                    file.transferTo(serverFile);
+                    return "http://43.139.90.182/img/" + file.getOriginalFilename();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    log.error(e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private String getFileNameWithoutExtension(String fileName) {

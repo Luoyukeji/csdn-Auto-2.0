@@ -5,6 +5,7 @@ import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import org.apache.ibatis.annotations.Mapper;
 
 
+
 @Mapper
 public interface CsdnArticleInfoMapper extends BaseMapper<CsdnArticleInfo> {
 

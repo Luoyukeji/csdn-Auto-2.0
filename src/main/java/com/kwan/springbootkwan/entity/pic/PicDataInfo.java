@@ -59,4 +59,7 @@ public class PicDataInfo implements Serializable {
     private Integer partnerId;
     private String hoverURL;
     private List<Object> replaceUrl;
+    private Object aiEditData;
+    private Object clarityScore;
+    private Object isAigcEdit;
 }

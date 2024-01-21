@@ -1,35 +1,52 @@
 package com.kwan.springbootkwan.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.query.CsdnUserInfoQuery;
 
 import java.util.List;
 
-/**
- * csdn用户信息(CsdnUserInfo)表服务接口
- *
- * @author makejava
- * @since 2023-10-23 16:03:14
- */
+
 public interface CsdnUserInfoService extends IService<CsdnUserInfo> {
 
 
     /**
-     * 通过用户名获取user信息
+     * 通过用户名获取用户信息
      *
      * @return
      */
     CsdnUserInfo getUserByUserName(String username);
 
     /**
+     * 获取用户信息
+     *
+     * @param userName
+     * @param nickName
+     * @return
+     */
+    CsdnUserInfo getUserInfo(String userName, String nickName);
+
+    /**
+     * 获取用户信息
+     *
+     * @param userName
+     * @return
+     */
+    CsdnUserInfo getUserCsdnApi(String userName);
+
+    /**
      * 通过用户名获取user信息
      *
      * @return
      */
-    List<CsdnUserInfo> getAllUser();
+    List<CsdnUserInfo> allUser();
+
+    /**
+     * 没有头像的用户
+     *
+     * @return
+     */
+    List<CsdnUserInfo> allNoAvatarUser();
 
     /**
      * 查询等待评论的用户
@@ -46,13 +63,22 @@ public interface CsdnUserInfoService extends IService<CsdnUserInfo> {
     void add(CsdnUserInfoQuery addInfo);
 
     /**
-     * 检查用户的状态
-     *
-     * @param csdnTripletDayInfo
-     * @param csdnUserInfo
-     * @param article
+     * 更新用户头像
      */
-    void checkUserStatus(CsdnTripletDayInfo csdnTripletDayInfo, CsdnUserInfo csdnUserInfo, BusinessInfoResponse.ArticleData.Article article);
+    void updateAvatar();
 
+    /**
+     * 获取用户头像
+     *
+     * @param userName
+     * @return
+     */
+    String getAvatar(String userName);
+
+
+    /**
+     * 更新用户的三连状态
+     */
+    void updateUserInfo();
 }
 

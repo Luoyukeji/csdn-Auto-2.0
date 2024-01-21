@@ -9,6 +9,7 @@ import com.kwan.springbootkwan.entity.dto.InterviewQuestionDTO;
 import com.kwan.springbootkwan.entity.query.InterviewQuestionAdd;
 import com.kwan.springbootkwan.entity.query.InterviewQuestionUpdate;
 import com.kwan.springbootkwan.service.InterviewQuestionService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
-/**
- * 面试题(InterviewQuestion)表控制层
- *
- * @author makejava
- * @since 2023-09-08 16:31:51
- */
+@Api(tags = "面试题api")
 @RestController
 @RequestMapping("interviewQuestion")
 public class InterviewQuestionController {

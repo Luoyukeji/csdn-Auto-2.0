@@ -7,8 +7,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnFollowFansInfo;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
 import com.kwan.springbootkwan.entity.csdn.DeleteFollowQuery;
 import com.kwan.springbootkwan.entity.csdn.DeleteFollowResponse;
 import com.kwan.springbootkwan.entity.csdn.FansResponse;
@@ -36,7 +36,7 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
 
     @Override
     public void saveFans() {
-        //删除全部数据
+        // 删除全部数据
         QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("is_delete", 0);
         wrapper.ne("need_notice", 1);
@@ -90,7 +90,7 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
      * @throws JsonProcessingException
      */
     private DeleteFollowResponse cancelFollow(CsdnFollowFansInfo csdnFollowFansInfo) throws JsonProcessingException {
-        //取消关注
+        // 取消关注
         DeleteFollowQuery deleteFollowQuery = new DeleteFollowQuery();
         deleteFollowQuery.setUsername(selfUserName);
         deleteFollowQuery.setDetailSourceName("个人主页");
@@ -137,26 +137,6 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
     }
 
     @Override
-    public void updatePostTime() {
-        QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
-        wrapper.eq("is_delete", 0);
-        wrapper.in("relation_type", "互关", "粉丝");
-        final List<CsdnFollowFansInfo> list = this.list(wrapper);
-        if (CollectionUtil.isNotEmpty(list)) {
-            for (CsdnFollowFansInfo csdnFollowFansInfo : list) {
-                final String userName = csdnFollowFansInfo.getUserName();
-                //获取最新的文章
-                final List<BusinessInfoResponse.ArticleData.Article> articles10 = csdnArticleInfoService.getArticles10(userName);
-                if (CollectionUtil.isNotEmpty(articles10)) {
-                    final BusinessInfoResponse.ArticleData.Article article = articles10.get(0);
-                    csdnFollowFansInfo.setPostTime(article.getPostTime());
-                    this.updateById(csdnFollowFansInfo);
-                }
-            }
-        }
-    }
-
-    @Override
     public List<CsdnFollowFansInfo> noticeUsers(Integer number) {
         QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("is_delete", 0);
@@ -179,12 +159,21 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
     }
 
     @Override
+    public List<CsdnFollowFansInfo> allIntercorrelation() {
+        QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("is_delete", 0);
+        wrapper.eq("relation_type", "互关");
+        return this.list(wrapper);
+    }
+
+    @Override
     public void deleteNoArticle() {
         final List<CsdnFollowFansInfo> all = this.getConcernCorrelation();
         if (CollectionUtil.isNotEmpty(all)) {
             for (CsdnFollowFansInfo csdnFollowFansInfo : all) {
+                final String nickName = csdnFollowFansInfo.getNickName();
                 final String userName = csdnFollowFansInfo.getUserName();
-                final List<BusinessInfoResponse.ArticleData.Article> articles10 = csdnArticleInfoService.getArticles10(userName);
+                final List<CsdnArticleInfo> articles10 = csdnArticleInfoService.getArticles10(nickName, userName);
                 if (CollectionUtil.isEmpty(articles10)) {
                     final DeleteFollowResponse deleteFollowResponse;
                     try {
@@ -241,7 +230,7 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
     private Integer getFanId() {
         Integer fanId = null;
         try {
-            //get方法
+            // get方法
             String url = "https://mp-action.csdn.net/interact/wrapper/pc/fans/v1/api/getFansOffsetList?pageSize=20&username=" + selfUserName;
             HttpResponse response = HttpUtil.createGet(url)
                     .header("Cookie", csdnCookie)
@@ -272,9 +261,15 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
         return fanId;
     }
 
+    /**
+     * 获取 fanId
+     *
+     * @param fanId
+     * @return
+     */
     private Integer saveWithFanId(Integer fanId) {
         try {
-            //get方法
+            // get方法
             String url = "https://mp-action.csdn.net/interact/wrapper/pc/fans/v1/api/getFansOffsetList?pageSize=20&username=" + selfUserName + "&fanId=" + fanId;
             HttpResponse response = HttpUtil.createGet(url)
                     .header("Cookie", csdnCookie)
@@ -283,22 +278,24 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
             ObjectMapper objectMapper = new ObjectMapper();
             FansResponse articleInfo = objectMapper.readValue(body, FansResponse.class);
             final FansResponse.FansData data = articleInfo.getData();
-            fanId = data.getFanId();
-            final List<FansResponse.FansData.FansListData> list = data.getList();
-            if (CollectionUtil.isNotEmpty(list)) {
-                for (FansResponse.FansData.FansListData fansListData : list) {
-                    final String username = fansListData.getUsername();
-                    QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
-                    wrapper.eq("is_delete", 0);
-                    wrapper.eq("user_name", username);
-                    CsdnFollowFansInfo csdnFollowFansInfo = this.getOne(wrapper);
-                    if (Objects.isNull(csdnFollowFansInfo)) {
-                        csdnFollowFansInfo = new CsdnFollowFansInfo();
-                        csdnFollowFansInfo.setUserName(username);
-                        csdnFollowFansInfo.setNickName(fansListData.getNickname());
-                        csdnFollowFansInfo.setBlogUrl(fansListData.getBlogUrl());
-                        csdnFollowFansInfo.setRelationType("粉丝");
-                        this.save(csdnFollowFansInfo);
+            if (Objects.nonNull(data)) {
+                fanId = data.getFanId();
+                final List<FansResponse.FansData.FansListData> list = data.getList();
+                if (CollectionUtil.isNotEmpty(list)) {
+                    for (FansResponse.FansData.FansListData fansListData : list) {
+                        final String username = fansListData.getUsername();
+                        QueryWrapper<CsdnFollowFansInfo> wrapper = new QueryWrapper<>();
+                        wrapper.eq("is_delete", 0);
+                        wrapper.eq("user_name", username);
+                        CsdnFollowFansInfo csdnFollowFansInfo = this.getOne(wrapper);
+                        if (Objects.isNull(csdnFollowFansInfo)) {
+                            csdnFollowFansInfo = new CsdnFollowFansInfo();
+                            csdnFollowFansInfo.setUserName(username);
+                            csdnFollowFansInfo.setNickName(fansListData.getNickname());
+                            csdnFollowFansInfo.setBlogUrl(fansListData.getBlogUrl());
+                            csdnFollowFansInfo.setRelationType("粉丝");
+                            this.save(csdnFollowFansInfo);
+                        }
                     }
                 }
             }
@@ -309,10 +306,15 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
     }
 
 
+    /**
+     * 获取粉丝信息
+     *
+     * @return
+     */
     private Integer getFollowId() {
         Integer fanId = null;
         try {
-            //get方法
+            // get方法
             String url = "https://mp-action.csdn.net/interact/wrapper/pc/fans/v1/api/getFollowOffsetList?pageSize=20&username=" + selfUserName;
             HttpResponse response = HttpUtil.createGet(url)
                     .header("Cookie", csdnCookie)
@@ -331,7 +333,7 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
                         byUserName.setRelationType("互关");
                         this.updateById(byUserName);
                     } else {
-                        //取消关注
+                        // 取消关注
                         byUserName = new CsdnFollowFansInfo();
                         byUserName.setUserName(username);
                         byUserName.setNickName(fansListData.getNickname());
@@ -349,7 +351,7 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
 
     private Integer saveWithFollowId(Integer fanId) {
         try {
-            //get方法
+            // get方法
             String url = "https://mp-action.csdn.net/interact/wrapper/pc/fans/v1/api/getFollowOffsetList?pageSize=20&username=" + selfUserName + "&fanId=" + fanId;
             HttpResponse response = HttpUtil.createGet(url)
                     .header("Cookie", csdnCookie)
@@ -371,7 +373,7 @@ public class CsdnFollowFansInfoServiceImpl extends ServiceImpl<CsdnFollowFansInf
                         csdnFollowFansInfo.setRelationType("互关");
                         this.updateById(csdnFollowFansInfo);
                     } else {
-                        //取消关注
+                        // 取消关注
                         csdnFollowFansInfo = new CsdnFollowFansInfo();
                         csdnFollowFansInfo.setUserName(username);
                         csdnFollowFansInfo.setNickName(fansListData.getNickname());

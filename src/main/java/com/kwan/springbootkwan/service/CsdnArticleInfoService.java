@@ -4,12 +4,41 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
+import com.kwan.springbootkwan.entity.csdn.CsdnUserSearch;
 
 import java.util.List;
 
 
 public interface CsdnArticleInfoService extends IService<CsdnArticleInfo> {
+
+
+    /**
+     * 根据用户昵称和用户名查询博客
+     *
+     * @param nickName
+     * @param userName
+     * @return
+     */
+    CsdnArticleInfo getArticle(String nickName, String userName);
+
+    /**
+     * 获取最新的10篇文章
+     *
+     * @param nickName
+     * @param userName
+     * @return
+     */
+    List<CsdnArticleInfo> getArticles10(String nickName, String userName);
+
+    /**
+     * 获取最新的100篇文章
+     *
+     * @param nickName
+     * @param userName
+     * @return
+     */
+    List<CsdnArticleInfo> getArticles100(String nickName, String userName);
+
     /**
      * 通过文章id获取文章信息
      *
@@ -23,39 +52,6 @@ public interface CsdnArticleInfoService extends IService<CsdnArticleInfo> {
      * @return
      */
     void saveArticle(CsdnArticleInfo csdnArticleInfo);
-
-    /**
-     * 获取最新的1篇文章
-     *
-     * @param username
-     * @return
-     */
-    BusinessInfoResponse.ArticleData.Article getArticle(String username);
-
-    /**
-     * 获取最新的10篇文章
-     *
-     * @param username
-     * @return
-     */
-    List<BusinessInfoResponse.ArticleData.Article> getArticles10(String username);
-
-    /**
-     * 获取n篇文章
-     *
-     * @param username
-     * @param number
-     * @return
-     */
-    List<BusinessInfoResponse.ArticleData.Article> getArticlesN(String username, Integer number);
-
-    /**
-     * 获取最新的100篇文章
-     *
-     * @param username
-     * @return
-     */
-    List<BusinessInfoResponse.ArticleData.Article> getArticles100(String username);
 
     /**
      * 获取文章质量分
@@ -86,14 +82,6 @@ public interface CsdnArticleInfoService extends IService<CsdnArticleInfo> {
      */
     void checkBlogStatus(CsdnTripletDayInfo csdnTripletDayInfo, CsdnArticleInfo csdnArticleInfo, CsdnUserInfo csdnUserInfo);
 
-
-    /**
-     * 给指定人员添加10篇博客
-     *
-     * @param username
-     */
-    void add10Blog(String username, CsdnUserInfo csdnUserInfo);
-
     /**
      * 查看某一文章的阅读量
      *
@@ -112,5 +100,14 @@ public interface CsdnArticleInfoService extends IService<CsdnArticleInfo> {
      * 删除低分文章
      */
     void deleteLowBlog();
+
+    /**
+     * 通过全局搜索保存文章
+     *
+     * @param searchInner
+     * @return
+     */
+    CsdnArticleInfo getArticleBySearchAll(CsdnUserSearch.CsdnUserSearchInner searchInner);
+
 }
 

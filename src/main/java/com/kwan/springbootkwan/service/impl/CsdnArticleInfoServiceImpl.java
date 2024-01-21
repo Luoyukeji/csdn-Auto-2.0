@@ -7,21 +7,20 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kwan.springbootkwan.constant.CommonConstant;
 import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
-import com.kwan.springbootkwan.entity.csdn.BusinessInfoResponse;
+import com.kwan.springbootkwan.entity.csdn.CsdnUserSearch;
 import com.kwan.springbootkwan.entity.csdn.DeleteQuery;
 import com.kwan.springbootkwan.entity.csdn.ScoreResponse;
 import com.kwan.springbootkwan.enums.CollectStatus;
 import com.kwan.springbootkwan.enums.CommentStatus;
 import com.kwan.springbootkwan.enums.LikeStatus;
 import com.kwan.springbootkwan.mapper.CsdnArticleInfoMapper;
+import com.kwan.springbootkwan.service.CsdnArticleCommentService;
 import com.kwan.springbootkwan.service.CsdnArticleInfoService;
+import com.kwan.springbootkwan.service.CsdnArticleLikeService;
 import com.kwan.springbootkwan.service.CsdnCollectService;
-import com.kwan.springbootkwan.service.CsdnCommentService;
-import com.kwan.springbootkwan.service.CsdnLikeService;
 import com.kwan.springbootkwan.utils.GetNonceUtil;
 import com.kwan.springbootkwan.utils.GetSignatureUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -53,16 +52,14 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
     private String selfUserName;
     @Value("${csdn.self_user_nick_name}")
     private String selfUserNickName;
-    @Value("${csdn.url.user_article_url}")
-    private String url;
     @Value("${csdn.url.get_article_score_url}")
     private String getArticleScoreUrl;
     @Resource
-    private CsdnLikeService csdnLikeService;
+    private CsdnArticleLikeService csdnArticleLikeService;
     @Resource
     private CsdnCollectService csdnCollectService;
     @Resource
-    private CsdnCommentService csdnCommentService;
+    private CsdnArticleCommentService csdnArticleCommentService;
 
     @Override
     public CsdnArticleInfo getArticleByArticleId(String articleId) {
@@ -71,6 +68,93 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
         wrapper.eq("article_id", articleId)
                 .last("limit 1");
         return this.getOne(wrapper);
+    }
+
+
+    @Override
+    public CsdnArticleInfo getArticle(String nickName, String userName) {
+
+        String url = "https://so.csdn.net/api/v3/search?q=" + nickName + "&t=blog&p=1&s=new&tm=7&lv=-1&ft=0&l=&u=&ct=-1&pnt=-1&ry=-1&ss=-1&dct=-1&vco=-1&cc=-1&sc=-1&akt=-1&art=-1&ca=-1&prs=&pre=&ecc=-1&ebc=-1&urw=&ia=1&dId=&cl=-1&scl=-1&tcl=-1&platform=pc&ab_test_code_overlap=&ab_test_random_code=";
+        HttpResponse response = HttpUtil.createGet(url).header("Cookie", csdnCookie).execute();
+        final String body = response.body();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            final CsdnUserSearch csdnUserSearch = objectMapper.readValue(body, CsdnUserSearch.class);
+            if (Objects.nonNull(csdnUserSearch)) {
+                final List<CsdnUserSearch.CsdnUserSearchInner> result_vos = csdnUserSearch.getResult_vos();
+                if (CollectionUtil.isNotEmpty(result_vos)) {
+                    for (CsdnUserSearch.CsdnUserSearchInner searchInner : result_vos) {
+                        final String username = searchInner.getUsername();
+                        if (StringUtils.equalsIgnoreCase(username, userName)) {
+                            return this.getArticleBySearchAll(searchInner);
+                        }
+                    }
+                }
+            }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<CsdnArticleInfo> getArticles10(String nickName, String userName) {
+        List<CsdnArticleInfo> res = new ArrayList<>();
+        String url = "https://so.csdn.net/api/v3/search?q=" + nickName + "&t=blog&p=1&s=new&tm=30&lv=-1&ft=0&l=&u=&ct=-1&pnt=-1&ry=-1&ss=-1&dct=-1&vco=-1&cc=-1&sc=-1&akt=-1&art=-1&ca=-1&prs=&pre=&ecc=-1&ebc=-1&urw=&ia=1&dId=&cl=-1&scl=-1&tcl=-1&platform=pc&ab_test_code_overlap=&ab_test_random_code=";
+        HttpResponse response = HttpUtil.createGet(url).header("Cookie", csdnCookie).execute();
+        final String body = response.body();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            final CsdnUserSearch csdnUserSearch = objectMapper.readValue(body, CsdnUserSearch.class);
+            if (Objects.nonNull(csdnUserSearch)) {
+                final List<CsdnUserSearch.CsdnUserSearchInner> result_vos = csdnUserSearch.getResult_vos();
+                if (CollectionUtil.isNotEmpty(result_vos)) {
+                    for (CsdnUserSearch.CsdnUserSearchInner searchInner : result_vos) {
+                        final String username = searchInner.getUsername();
+                        if (StringUtils.equalsIgnoreCase(username, userName)) {
+                            if (res.size() >= 10) {
+                                return res;
+                            }
+                            res.add(this.getArticleBySearchAll(searchInner));
+                        }
+                    }
+                }
+            }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    @Override
+    public List<CsdnArticleInfo> getArticles100(String nickName, String userName) {
+        List<CsdnArticleInfo> res = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            String url = "https://so.csdn.net/api/v3/search?q=" + nickName + "&t=blog&p=" + i + "&s=new&tm=30&lv=-1&ft=0&l=&u=&ct=-1&pnt=-1&ry=-1&ss=-1&dct=-1&vco=-1&cc=-1&sc=-1&akt=-1&art=-1&ca=-1&prs=&pre=&ecc=-1&ebc=-1&urw=&ia=1&dId=&cl=-1&scl=-1&tcl=-1&platform=pc&ab_test_code_overlap=&ab_test_random_code=";
+            HttpResponse response = HttpUtil.createGet(url).header("Cookie", csdnCookie).execute();
+            final String body = response.body();
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                final CsdnUserSearch csdnUserSearch = objectMapper.readValue(body, CsdnUserSearch.class);
+                if (Objects.nonNull(csdnUserSearch)) {
+                    final List<CsdnUserSearch.CsdnUserSearchInner> result_vos = csdnUserSearch.getResult_vos();
+                    if (CollectionUtil.isNotEmpty(result_vos)) {
+                        for (CsdnUserSearch.CsdnUserSearchInner searchInner : result_vos) {
+                            final String username = searchInner.getUsername();
+                            if (StringUtils.equalsIgnoreCase(username, userName)) {
+                                if (res.size() >= 100) {
+                                    return res;
+                                }
+                                res.add(this.getArticleBySearchAll(searchInner));
+                            }
+                        }
+                    }
+                }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+        return res;
     }
 
     @Override
@@ -89,125 +173,6 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
             csdnArticleInfo.setIsMyself(add.getIsMyself());
             this.save(csdnArticleInfo);
         }
-    }
-
-    @Override
-    public BusinessInfoResponse.ArticleData.Article getArticle(String username) {
-        HttpResponse response = HttpUtil.createGet(url)
-                .header("Cookie", csdnCookie)
-                .form("page", 1)
-                .form("size", 10)
-                .form("businessType", "lately")
-                .form("noMore", false)
-                .form("username", username)
-                .execute();
-        final String body = response.body();
-        ObjectMapper objectMapper = new ObjectMapper();
-        BusinessInfoResponse businessInfoResponse;
-        List<BusinessInfoResponse.ArticleData.Article> list = null;
-        try {
-            businessInfoResponse = objectMapper.readValue(body, BusinessInfoResponse.class);
-            final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
-            list = data.getList();
-            if (CollectionUtil.isNotEmpty(list)) {
-
-                for (BusinessInfoResponse.ArticleData.Article article : list) {
-                    final String type = article.getType();
-                    if (StringUtils.equals(type, "blog")) {
-                        return article;
-                    }
-                }
-            }
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public List<BusinessInfoResponse.ArticleData.Article> getArticles10(String username) {
-        HttpResponse response = HttpUtil.createGet(url)
-                .header("Cookie", csdnCookie)
-                .form("page", 1)
-                .form("size", 10)
-                .form("businessType", "lately")
-                .form("noMore", false)
-                .form("username", username)
-                .execute();
-        final String body = response.body();
-        ObjectMapper objectMapper = new ObjectMapper();
-        BusinessInfoResponse businessInfoResponse;
-        List<BusinessInfoResponse.ArticleData.Article> list = null;
-        try {
-            businessInfoResponse = objectMapper.readValue(body, BusinessInfoResponse.class);
-            final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
-            list = data.getList();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        if (CollectionUtil.isEmpty(list)) {
-            return null;
-        }
-        return list;
-    }
-
-    @Override
-    public List<BusinessInfoResponse.ArticleData.Article> getArticlesN(String username, Integer number) {
-        HttpResponse response = HttpUtil.createGet(url)
-                .header("Cookie", csdnCookie)
-                .form("page", 1)
-                .form("size", number)
-                .form("businessType", "lately")
-                .form("noMore", false)
-                .form("username", username)
-                .execute();
-        final String body = response.body();
-        ObjectMapper objectMapper = new ObjectMapper();
-        BusinessInfoResponse businessInfoResponse;
-        List<BusinessInfoResponse.ArticleData.Article> list = null;
-        try {
-            businessInfoResponse = objectMapper.readValue(body, BusinessInfoResponse.class);
-            final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
-            list = data.getList();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        if (CollectionUtil.isEmpty(list)) {
-            return null;
-        }
-        return list;
-    }
-
-    @Override
-    public List<BusinessInfoResponse.ArticleData.Article> getArticles100(String username) {
-        List<BusinessInfoResponse.ArticleData.Article> resp = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
-            HttpResponse response = HttpUtil.createGet(url)
-                    .header("Cookie", csdnCookie)
-                    .form("page", i)
-                    .form("size", 100)
-                    .form("businessType", "lately")
-                    .form("noMore", false)
-                    .form("username", username)
-                    .execute();
-            final String body = response.body();
-            ObjectMapper objectMapper = new ObjectMapper();
-            BusinessInfoResponse businessInfoResponse;
-            try {
-                businessInfoResponse = objectMapper.readValue(body, BusinessInfoResponse.class);
-                final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
-                final List<BusinessInfoResponse.ArticleData.Article> list = data.getList();
-                if (CollectionUtil.isNotEmpty(list)) {
-                    resp.addAll(list);
-                    if (resp.size() >= 200) {
-                        return resp;
-                    }
-                }
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-        }
-        return resp;
     }
 
     @Override
@@ -270,7 +235,10 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
                 ScoreResponse scoreResponse;
                 try {
                     scoreResponse = objectMapper.readValue(responseBody, ScoreResponse.class);
-                    return scoreResponse.getData().getScore();
+                    final ScoreResponse.ScoreData data = scoreResponse.getData();
+                    if (Objects.nonNull(data)) {
+                        return data.getScore();
+                    }
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
@@ -280,7 +248,7 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return 0;
     }
 
     @Override
@@ -304,33 +272,6 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
         }
     }
 
-    @Override
-    public void add10Blog(String username, CsdnUserInfo csdnUserInfo) {
-        final List<BusinessInfoResponse.ArticleData.Article> blogs = this.getArticles10(username);
-        if (CollectionUtil.isNotEmpty(blogs)) {
-            for (BusinessInfoResponse.ArticleData.Article article : blogs) {
-                final String type = article.getType();
-                if (StringUtils.equals(type, CommonConstant.ARTICLE_TYPE_BLOG)) {
-                    CsdnArticleInfo csdnArticleInfo = this.getArticleByArticleId(article.getArticleId());
-                    if (Objects.isNull(csdnArticleInfo)) {
-                        csdnArticleInfo = new CsdnArticleInfo();
-                        final String url = article.getUrl();
-                        csdnArticleInfo.setArticleId(article.getArticleId());
-                        csdnArticleInfo.setArticleUrl(url);
-                        csdnArticleInfo.setArticleTitle(article.getTitle());
-                        csdnArticleInfo.setArticleDescription(article.getDescription());
-                        csdnArticleInfo.setUserName(username);
-                        csdnArticleInfo.setNickName(csdnUserInfo.getNickName());
-                        csdnArticleInfo.setArticleScore(this.getScore(url));
-                        if (StringUtils.equals(selfUserName, username)) {
-                            csdnArticleInfo.setIsMyself(1);
-                        }
-                        this.saveArticle(csdnArticleInfo);
-                    }
-                }
-            }
-        }
-    }
 
     @Override
     public Integer getViewCount(String userName, String articleId) {
@@ -340,6 +281,10 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
                 .form("articleId", articleId)
                 .execute();
         final String body = response.body();
+        final int pid = body.indexOf("\"pid\":\"404\"");
+        if (pid != -1) {
+            return 0;
+        }
         final int index = body.indexOf("阅读量");
         String str = body.substring(index, index + 7);
         for (int i = str.length() - 1; i >= 0; i--) {
@@ -362,43 +307,20 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
 
     @Override
     public void syncMyBlog() {
-        //获取本人10页的博客信息
-        for (int i = 1; i < 11; i++) {
-            HttpResponse response = HttpUtil.createGet(url)
-                    .header("Cookie", csdnCookie)
-                    .form("page", i)
-                    .form("size", 100)
-                    .form("businessType", "blog")
-                    .form("noMore", false)
-                    .form("username", selfUserName)
-                    .execute();
+        for (int i = 1; i <= 100; i++) {
+            String url = "https://so.csdn.net/api/v3/search?q=" + selfUserNickName + "&t=blog&p=" + i + "&s=new&tm=30&lv=-1&ft=0&l=&u=&ct=-1&pnt=-1&ry=-1&ss=-1&dct=-1&vco=-1&cc=-1&sc=-1&akt=-1&art=-1&ca=-1&prs=&pre=&ecc=-1&ebc=-1&urw=&ia=1&dId=&cl=-1&scl=-1&tcl=-1&platform=pc&ab_test_code_overlap=&ab_test_random_code=";
+            HttpResponse response = HttpUtil.createGet(url).header("Cookie", csdnCookie).execute();
             final String body = response.body();
             ObjectMapper objectMapper = new ObjectMapper();
-            BusinessInfoResponse businessInfoResponse;
             try {
-                businessInfoResponse = objectMapper.readValue(body, BusinessInfoResponse.class);
-                final BusinessInfoResponse.ArticleData data = businessInfoResponse.getData();
-                if (Objects.nonNull(data)) {
-                    List<BusinessInfoResponse.ArticleData.Article> list = data.getList();
-                    if (CollectionUtil.isNotEmpty(list)) {
-                        for (BusinessInfoResponse.ArticleData.Article article : list) {
-                            final String articleId = article.getArticleId();
-                            CsdnArticleInfo csdnArticleInfo = this.getArticleByArticleId(articleId);
-                            if (Objects.isNull(csdnArticleInfo)) {
-                                csdnArticleInfo = new CsdnArticleInfo();
-                                csdnArticleInfo.setArticleId(articleId);
-                                final String url = article.getUrl();
-                                csdnArticleInfo.setArticleUrl(url);
-                                csdnArticleInfo.setArticleScore(this.getArticleScore(url));
-                                csdnArticleInfo.setArticleTitle(article.getTitle());
-                                csdnArticleInfo.setArticleDescription(article.getDescription());
-                                csdnArticleInfo.setUserName(selfUserName);
-                                csdnArticleInfo.setNickName(selfUserNickName);
-                                csdnArticleInfo.setLikeStatus(9);
-                                csdnArticleInfo.setCollectStatus(9);
-                                csdnArticleInfo.setCommentStatus(9);
-                                csdnArticleInfo.setIsMyself(1);
-                                this.save(csdnArticleInfo);
+                final CsdnUserSearch csdnUserSearch = objectMapper.readValue(body, CsdnUserSearch.class);
+                if (Objects.nonNull(csdnUserSearch)) {
+                    final List<CsdnUserSearch.CsdnUserSearchInner> result_vos = csdnUserSearch.getResult_vos();
+                    if (CollectionUtil.isNotEmpty(result_vos)) {
+                        for (CsdnUserSearch.CsdnUserSearchInner searchInner : result_vos) {
+                            final String username = searchInner.getUsername();
+                            if (StringUtils.equalsIgnoreCase(username, selfUserName)) {
+                                this.getArticleBySearchAll(searchInner);
                             }
                         }
                     }
@@ -465,6 +387,29 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
     }
 
     @Override
+    public CsdnArticleInfo getArticleBySearchAll(CsdnUserSearch.CsdnUserSearchInner searchInner) {
+        final String articleId = searchInner.getArticleid();
+        CsdnArticleInfo csdnArticleInfo = this.getArticleByArticleId(articleId);
+        if (Objects.isNull(csdnArticleInfo)) {
+            final String username = searchInner.getUsername();
+            final String url = "https://blog.csdn.net/" + username + "/article/details/" + articleId;
+            csdnArticleInfo = new CsdnArticleInfo();
+            csdnArticleInfo.setArticleId(articleId);
+            csdnArticleInfo.setArticleUrl(url);
+            csdnArticleInfo.setArticleTitle(searchInner.getTitle());
+            csdnArticleInfo.setArticleDescription(searchInner.getDescription());
+            csdnArticleInfo.setUserName(username);
+            csdnArticleInfo.setNickName(searchInner.getNickname());
+            csdnArticleInfo.setArticleScore(this.getScore(url));
+            if (StringUtils.equalsIgnoreCase(selfUserName, username)) {
+                csdnArticleInfo.setIsMyself(1);
+            }
+            this.saveArticle(csdnArticleInfo);
+        }
+        return csdnArticleInfo;
+    }
+
+    @Override
     public Integer getScore(String articleUrl) {
         return this.getArticleScore(articleUrl);
     }
@@ -475,19 +420,19 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
         final Integer likeStatus = csdnTripletDayInfo.getLikeStatus();
         final Integer commentStatus = csdnTripletDayInfo.getCommentStatus();
         final String articleId = csdnArticleInfo.getArticleId();
-        //处理点赞的情况
+        // 处理点赞的情况
         if (LikeStatus.LIKE_IS_FULL.getCode().equals(likeStatusQuery)) {
-            final Boolean like = csdnLikeService.isLike(articleId, csdnUserInfo);
+            final Boolean like = csdnArticleLikeService.isLike(articleId, csdnUserInfo);
             if (like) {
                 csdnArticleInfo.setLikeStatus(LikeStatus.HAVE_ALREADY_LIKED.getCode());
             } else if (LikeStatus.LIKE_IS_FULL.getCode().equals(likeStatus)) {
                 csdnArticleInfo.setLikeStatus(LikeStatus.LIKE_IS_FULL.getCode());
             } else {
-                //如果当天是点赞成功状态,则可以点赞,文章点赞状态是未处理状态
+                // 如果当天是点赞成功状态,则可以点赞,文章点赞状态是未处理状态
                 csdnArticleInfo.setLikeStatus(LikeStatus.UN_PROCESSED.getCode());
             }
         }
-        //收藏
+        // 收藏
         final Boolean collect = csdnCollectService.isCollect(articleId, csdnUserInfo);
         if (collect) {
             csdnArticleInfo.setCollectStatus(CollectStatus.HAVE_ALREADY_COLLECT.getCode());
@@ -496,21 +441,19 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
         } else {
             csdnArticleInfo.setCollectStatus(CollectStatus.UN_PROCESSED.getCode());
         }
-        //处理评论的情况
+        // 处理评论的情况
         final Integer commentStatusQuery = csdnArticleInfo.getCommentStatus();
         if (CommentStatus.COMMENT_IS_FULL.getCode().equals(commentStatusQuery)
                 || CommentStatus.RESTRICTED_COMMENTS.getCode().equals(commentStatusQuery)
                 || CommentStatus.COMMENT_TOO_FAST.getCode().equals(commentStatusQuery)
-                || CommentStatus.COMMENT_NUM_49.getCode().equals(commentStatusQuery)) {
-            //查询是否评论过
-            BusinessInfoResponse.ArticleData.Article article = new BusinessInfoResponse.ArticleData.Article();
-            article.setUrl(csdnArticleInfo.getArticleUrl());
-            final Boolean comment = csdnCommentService.isComment(article, csdnUserInfo);
+                || CommentStatus.COMMENT_NUM_40.getCode().equals(commentStatusQuery)) {
+            // 查询是否评论过
+            final Boolean comment = csdnArticleCommentService.isComment(csdnArticleInfo, csdnUserInfo);
             if (comment) {
                 csdnArticleInfo.setCommentStatus(CommentStatus.HAVE_ALREADY_COMMENT.getCode());
             } else if (CommentStatus.COMMENT_IS_FULL.getCode().equals(commentStatus)
                     || CommentStatus.RESTRICTED_COMMENTS.getCode().equals(commentStatus)
-                    || CommentStatus.COMMENT_NUM_49.getCode().equals(commentStatus)) {
+                    || CommentStatus.COMMENT_NUM_40.getCode().equals(commentStatus)) {
                 csdnArticleInfo.setCommentStatus(commentStatus);
             } else {
                 csdnArticleInfo.setCommentStatus(CommentStatus.UN_PROCESSED.getCode());

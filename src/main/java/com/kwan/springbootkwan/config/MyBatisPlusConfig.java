@@ -9,13 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-/**
- * mybatisplus配置
- *
- * @author : qinyingjie
- * @version : 2.2.0
- * @date : 2022/12/19 16:11
- */
 @MapperScan("com.kwan.springbootkwan.mapper")
 @EnableTransactionManagement //事务控制
 @Configuration //配置类

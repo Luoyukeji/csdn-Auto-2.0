@@ -1,6 +1,7 @@
 package com.kwan.springbootkwan.controller;
 
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kwan.springbootkwan.entity.AlgorithmicProblem;
@@ -8,6 +9,8 @@ import com.kwan.springbootkwan.entity.Result;
 import com.kwan.springbootkwan.entity.dto.AlgorithmicProblemDTO;
 import com.kwan.springbootkwan.entity.query.AlgorithmicProblemQuery;
 import com.kwan.springbootkwan.service.AlgorithmicProblemService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,13 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Set;
 
-/**
- * 算法题(AlgorithmicProblem)表控制层
- *
- * @author makejava
- * @since 2023-10-07 09:15:45
- */
+@Api(tags = "算法题api")
 @RestController
 @RequestMapping("algorithmicProblem")
 public class AlgorithmicProblemController {
@@ -32,35 +31,35 @@ public class AlgorithmicProblemController {
     @Resource
     private AlgorithmicProblemService algorithmicProblemService;
 
-    /**
-     * 分页查询所有数据
-     *
-     * @return 所有数据
-     */
-    @GetMapping("/page")
-    public Result selectAll(@RequestParam Integer page
-            , @RequestParam Integer pageSize
-            , @RequestParam String questionName
-            , @RequestParam String questionType) {
+    @ApiOperation(value = "获取算法题", nickname = "获取算法题")
+    @PostMapping("/page")
+    public Result selectAll(@RequestBody AlgorithmicProblemQuery query) {
         Page<AlgorithmicProblem> pageParm = new Page<>();
-        pageParm.setCurrent(page);
-        pageParm.setSize(pageSize);
+        pageParm.setCurrent(query.getPage());
+        pageParm.setSize(query.getPageSize());
         QueryWrapper<AlgorithmicProblem> wrapper = new QueryWrapper<>();
+        wrapper.eq("is_delete", 0);
         wrapper.orderByDesc("id");
-
+        final String questionType = query.getQuestionType();
         if (StringUtils.isNotEmpty(questionType)) {
             wrapper.eq("question_type", questionType);
         }
-        wrapper.eq("is_delete", 0);
+        final String questionName = query.getQuestionName();
         if (StringUtils.isNotEmpty(questionName)) {
             wrapper.like("question_name", questionName);
+        }
+        final Set<String> tag = query.getTag();
+        if (CollectionUtil.isNotEmpty(tag)) {
+            wrapper.and(w -> {
+                for (String tagItem : tag) {
+                    w.or().like("tag", tagItem);
+                }
+            });
         }
         return Result.ok(AlgorithmicProblemDTO.Converter.INSTANCE.from(this.algorithmicProblemService.page(pageParm, wrapper)));
     }
 
-    /**
-     * 随机一题
-     */
+    @ApiOperation(value = "随机一题", nickname = "随机一题")
     @GetMapping("/random")
     public Result random() {
         QueryWrapper<AlgorithmicProblem> wrapper = new QueryWrapper<>();
@@ -69,15 +68,10 @@ public class AlgorithmicProblemController {
         return Result.ok(AlgorithmicProblemDTO.Converter.INSTANCE.from(this.algorithmicProblemService.getOne(wrapper)));
     }
 
-    /**
-     * 新增问题
-     *
-     * @return 所有数据
-     */
     @PostMapping("/add")
-    public Result add(@RequestBody AlgorithmicProblemQuery addInfo) {
-        final Integer addType = addInfo.getAddType();
-        final String questionName = addInfo.getQuestionName();
+    public Result add(@RequestBody AlgorithmicProblemQuery query) {
+        final Integer addType = query.getAddType();
+        final String questionName = query.getQuestionName();
         if (StringUtils.isEmpty(questionName)) {
             return Result.error("问题不能为空");
         }
@@ -95,7 +89,7 @@ public class AlgorithmicProblemController {
                 wrapper.eq("is_delete", 0);
                 final AlgorithmicProblem one = this.algorithmicProblemService.getOne(wrapper);
                 if (one == null) {
-                    BeanUtils.copyProperties(addInfo, algorithmicProblem);
+                    BeanUtils.copyProperties(query, algorithmicProblem);
                     algorithmicProblem.setQuestionName(str);
                     this.algorithmicProblemService.save(algorithmicProblem);
                 }
@@ -107,7 +101,11 @@ public class AlgorithmicProblemController {
             wrapper.eq("is_delete", 0);
             final AlgorithmicProblem one = this.algorithmicProblemService.getOne(wrapper);
             if (one == null) {
-                BeanUtils.copyProperties(addInfo, algorithmicProblem);
+                BeanUtils.copyProperties(query, algorithmicProblem);
+                final Set<String> tag = query.getTag();
+                if (CollectionUtil.isNotEmpty(tag)) {
+                    algorithmicProblem.setTag(StringUtils.join(tag, ","));
+                }
                 this.algorithmicProblemService.save(algorithmicProblem);
                 return Result.ok();
             } else {
@@ -117,25 +115,17 @@ public class AlgorithmicProblemController {
         return Result.ok();
     }
 
-    /**
-     * 更新面试题
-     *
-     * @param query
-     * @return
-     */
     @PostMapping("/update")
     public Result update(@RequestBody AlgorithmicProblemQuery query) {
         AlgorithmicProblem algorithmicProblem = new AlgorithmicProblem();
         BeanUtils.copyProperties(query, algorithmicProblem);
+        final Set<String> tag = query.getTag();
+        if (CollectionUtil.isNotEmpty(tag)) {
+            algorithmicProblem.setTag(StringUtils.join(tag, ","));
+        }
         return Result.ok(this.algorithmicProblemService.updateById(algorithmicProblem));
     }
 
-    /**
-     * 删除面试题
-     *
-     * @param id
-     * @return
-     */
     @GetMapping("/delete")
     public Result delete(@RequestParam("id") Integer id) {
         AlgorithmicProblem algorithmicProblem = new AlgorithmicProblem();

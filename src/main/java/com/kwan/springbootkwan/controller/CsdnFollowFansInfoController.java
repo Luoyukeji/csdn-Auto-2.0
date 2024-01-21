@@ -84,20 +84,12 @@ public class CsdnFollowFansInfoController {
         return Result.ok("取消23开头的已关注,并删除完成");
     }
 
-    @ApiOperation(value = "互关用户最新发布时间更新", nickname = "互关用户最新发布时间更新")
-    @GetMapping("/updatePostTime")
-    public Result updatePostTime() {
-        csdnFollowFansInfoService.updatePostTime();
-        return Result.ok("互关用户最新发布时间更新完成");
-    }
-
     @ApiOperation(value = "取消没有文章的,并删除", nickname = "取消没有文章的,并删除")
     @GetMapping("/deleteNoArticle")
     public Result deleteNoArticle() {
         csdnFollowFansInfoService.deleteNoArticle();
         return Result.ok("取消没有文章的,并删除完成");
     }
-
 
     @ApiOperation(value = "获取通知发红包的用户", nickname = "获取通知发红包的用户")
     @GetMapping("/noticeUsers")

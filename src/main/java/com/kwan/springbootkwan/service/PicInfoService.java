@@ -4,12 +4,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.kwan.springbootkwan.entity.PicInfo;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * 图片信息表(PicInfo)表服务接口
- *
- * @author makejava
- * @since 2023-08-09 12:44:03
- */
 public interface PicInfoService extends IService<PicInfo> {
     /**
      * 根据名称查询图片
@@ -26,7 +20,7 @@ public interface PicInfoService extends IService<PicInfo> {
      * @param type
      * @return
      */
-    boolean insertByPath(String path, Integer type);
+    boolean insertByPath(String path, String type);
 
     /**
      * 根据百度图片路径获取图片
@@ -35,7 +29,7 @@ public interface PicInfoService extends IService<PicInfo> {
      * @param type
      * @return
      */
-    boolean insertByBaiduUrl(String url, Integer type);
+    boolean insertByBaiduUrl(String url, String type);
 
     /**
      * 上传图片
@@ -43,5 +37,13 @@ public interface PicInfoService extends IService<PicInfo> {
      * @param file
      */
     void handleFileUpload(MultipartFile[] file);
+
+
+    /**
+     * 根据url上传图片
+     *
+     * @param url
+     */
+    String uploadByUrl(String url);
 }
 
