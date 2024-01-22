@@ -121,5 +121,6 @@ public class CsdnUserSearch implements Serializable {
         private Object article_sco;
         private Object ext_13;
         private Object author_id;
+        private Object blogId;
     }
 }
