@@ -21,7 +21,6 @@ csdn:
   self_user_nick_name: "xxx"  #csdn自己的昵称
   self_folder_id: 1234  #csdn自己的收藏夹id
   auto_add_view_count: 2000  #刷浏览量数量
-  red_package_count: 1  #红包抢位
   auto_comment_count: 40  #评论个数
   #给别人的评论
   self_comment: xxxx;xxxx;xxxx
