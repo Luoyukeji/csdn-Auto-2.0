@@ -30,9 +30,9 @@ public class CsdnTripletDayInfoServiceImpl extends ServiceImpl<CsdnTripletDayInf
         QueryWrapper<CsdnTripletDayInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("is_delete", 0);
         wrapper.eq("triplet_date", formattedDate);
-        final CsdnTripletDayInfo one = this.getOne(wrapper);
-        if (Objects.isNull(one)) {
-            CsdnTripletDayInfo csdnTripletDayInfo = new CsdnTripletDayInfo();
+        CsdnTripletDayInfo csdnTripletDayInfo = this.getOne(wrapper);
+        if (Objects.isNull(csdnTripletDayInfo)) {
+            csdnTripletDayInfo = new CsdnTripletDayInfo();
             csdnTripletDayInfo.setTripletDate(new Date());
             // 获取今天的星期
             Week dayOfWeek = DateUtil.dayOfWeekEnum(DateUtil.date());
@@ -41,7 +41,7 @@ public class CsdnTripletDayInfoServiceImpl extends ServiceImpl<CsdnTripletDayInf
             csdnTripletDayInfo.setWeekInfo(uppercaseDayOfWeek);
             this.save(csdnTripletDayInfo);
         }
-        return one;
+        return csdnTripletDayInfo;
     }
 
     private List<String> days() {
