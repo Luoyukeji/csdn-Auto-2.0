@@ -81,9 +81,6 @@ public class CsdnUserSearch implements Serializable {
         private Boolean eventView;
         private Object tags;
         private Object utm_source;
-
-
-        private String ext_27;
         private String digg;
         private String language;
         private String pic;
@@ -97,21 +94,13 @@ public class CsdnUserSearch implements Serializable {
         private Boolean is_new;
         private String author;
         private String vip_view_auth;
-        private String ext_15;
-        private String ext_17;
         private Object search_tag;
-        private String ext_23;
-        private String ext_20;
-        private String ext_21;
         private String fetch_field_type;
         private String articleid;
         private String description;
         private String created_at;
         private String title;
-        private String ext_1;
-        private String ext_10;
         private String digest;
-        private String ext_6;
         private String author_space;
         private String create_time_str;
         private String so_type;
@@ -119,8 +108,34 @@ public class CsdnUserSearch implements Serializable {
         private Integer locationNum;
         private Object collections;
         private Object article_sco;
-        private Object ext_13;
         private Object author_id;
         private Object blogId;
+        private Object ext_1;
+        private Object ext_2;
+        private Object ext_3;
+        private Object ext_4;
+        private Object ext_5;
+        private Object ext_6;
+        private Object ext_7;
+        private Object ext_8;
+        private Object ext_9;
+        private Object ext_10;
+        private Object ext_11;
+        private Object ext_12;
+        private Object ext_13;
+        private Object ext_14;
+        private String ext_15;
+        private String ext_16;
+        private String ext_17;
+        private String ext_18;
+        private String ext_19;
+        private String ext_20;
+        private String ext_21;
+        private String ext_22;
+        private String ext_23;
+        private String ext_24;
+        private String ext_25;
+        private String ext_26;
+        private Object ext_27;
     }
 }
