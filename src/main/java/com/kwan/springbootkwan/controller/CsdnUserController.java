@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.kwan.springbootkwan.constant.CommonConstant;
 import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.Result;
@@ -132,7 +131,7 @@ public class CsdnUserController {
                 final String userName = csdnUserInfo.getUserName();
                 final CsdnArticleInfo articleInfo = csdnArticleInfoService.getArticle(nickName, userName);
                 if (Objects.nonNull(articleInfo)) {
-                    csdnUserInfo.setArticleType(CommonConstant.BlogType.BLOG);
+                    csdnUserInfo.setArticleType(articleInfo.getArticleType());
                     csdnUserInfo.setLikeStatus(LikeStatus.UN_PROCESSED.getCode());
                     csdnUserInfo.setCollectStatus(CommentStatus.UN_PROCESSED.getCode());
                     csdnUserInfo.setCommentStatus(CommentStatus.UN_PROCESSED.getCode());
@@ -152,7 +151,7 @@ public class CsdnUserController {
             final String userName = csdnUserInfo.getUserName();
             final CsdnArticleInfo articleInfo = csdnArticleInfoService.getArticle(nickName, userName);
             if (Objects.nonNull(articleInfo)) {
-                csdnUserInfo.setArticleType(CommonConstant.BlogType.BLOG);
+                csdnUserInfo.setArticleType(articleInfo.getArticleType());
                 csdnService.tripletByArticle(csdnUserInfo, articleInfo);
                 csdnUserInfoService.updateById(csdnUserInfo);
             }

@@ -22,6 +22,8 @@ public class CsdnArticleInfo extends Model<CsdnArticleInfo> {
     private Integer articleScore;
     @ApiModelProperty("文章标题")
     private String articleTitle;
+    @ApiModelProperty("文章类型")
+    private String articleType;
     @ApiModelProperty("文章描述")
     private String articleDescription;
     @ApiModelProperty("用户名称")

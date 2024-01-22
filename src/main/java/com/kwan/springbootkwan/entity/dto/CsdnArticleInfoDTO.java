@@ -28,6 +28,8 @@ public class CsdnArticleInfoDTO extends Model<CsdnArticleInfoDTO> {
     private String articleTitle;
     @ApiModelProperty("文章描述")
     private String articleDescription;
+    @ApiModelProperty("文章类型")
+    private String articleType;
     @ApiModelProperty("用户名称")
     private String userName;
     @ApiModelProperty("用户昵称")

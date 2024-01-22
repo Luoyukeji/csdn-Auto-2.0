@@ -1,7 +1,6 @@
 package com.kwan.springbootkwan.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.kwan.springbootkwan.constant.CommonConstant;
 import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
 import com.kwan.springbootkwan.entity.Result;
@@ -69,7 +68,7 @@ public class CsdnController {
             final String nickName = csdnUserInfo.getNickName();
             final CsdnArticleInfo articleInfo = csdnArticleInfoService.getArticle(nickName, username);
             if (Objects.nonNull(articleInfo)) {
-                csdnUserInfo.setArticleType(CommonConstant.BlogType.BLOG);
+                csdnUserInfo.setArticleType(articleInfo.getArticleType());
                 csdnService.tripletByArticle(csdnUserInfo, articleInfo);
             }
         }

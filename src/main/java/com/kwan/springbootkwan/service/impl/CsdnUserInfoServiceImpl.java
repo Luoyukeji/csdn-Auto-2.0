@@ -234,7 +234,7 @@ public class CsdnUserInfoServiceImpl extends ServiceImpl<CsdnUserInfoMapper, Csd
                     final String url = articleInfo.getArticleUrl();
                     final String currBlogUrl = csdnUserInfo.getCurrBlogUrl();
                     if (!StringUtils.equals(currBlogUrl, url)) {
-                        csdnUserInfo.setArticleType(CommonConstant.BlogType.BLOG);
+                        csdnUserInfo.setArticleType(articleInfo.getArticleType());
                         csdnUserInfo.setLikeStatus(LikeStatus.UN_PROCESSED.getCode());
                         csdnUserInfo.setCollectStatus(CommentStatus.UN_PROCESSED.getCode());
                         csdnUserInfo.setCommentStatus(CommentStatus.UN_PROCESSED.getCode());

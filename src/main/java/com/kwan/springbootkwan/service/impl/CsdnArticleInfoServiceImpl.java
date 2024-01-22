@@ -100,7 +100,7 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
     @Override
     public List<CsdnArticleInfo> getArticles10(String nickName, String userName) {
         List<CsdnArticleInfo> res = new ArrayList<>();
-        String url = "https://so.csdn.net/api/v3/search?q=" + nickName + "&t=blog&p=1&s=new&tm=30&lv=-1&ft=0&l=&u=&ct=-1&pnt=-1&ry=-1&ss=-1&dct=-1&vco=-1&cc=-1&sc=-1&akt=-1&art=-1&ca=-1&prs=&pre=&ecc=-1&ebc=-1&urw=&ia=1&dId=&cl=-1&scl=-1&tcl=-1&platform=pc&ab_test_code_overlap=&ab_test_random_code=";
+        String url = "https://so.csdn.net/api/v3/search?q=" + nickName + "&t=blog&p=1&s=new&tm=10&lv=-1&ft=0&l=&u=&ct=-1&pnt=-1&ry=-1&ss=-1&dct=-1&vco=-1&cc=-1&sc=-1&akt=-1&art=-1&ca=-1&prs=&pre=&ecc=-1&ebc=-1&urw=&ia=1&dId=&cl=-1&scl=-1&tcl=-1&platform=pc&ab_test_code_overlap=&ab_test_random_code=";
         HttpResponse response = HttpUtil.createGet(url).header("Cookie", csdnCookie).execute();
         final String body = response.body();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -401,6 +401,7 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
             csdnArticleInfo.setArticleDescription(searchInner.getDescription());
             csdnArticleInfo.setUserName(username);
             csdnArticleInfo.setNickName(nickname);
+            csdnArticleInfo.setArticleType(searchInner.getType());
             csdnArticleInfo.setArticleScore(this.getScore(url));
             if (StringUtils.equalsIgnoreCase(selfUserName, username)) {
                 csdnArticleInfo.setIsMyself(1);

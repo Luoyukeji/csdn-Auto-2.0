@@ -67,6 +67,7 @@ CREATE TABLE `csdn_article_info`
     `article_score`       tinyint                                                       DEFAULT '0' COMMENT '文章分数',
     `article_title`       text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '文章标题',
     `article_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '文章描述',
+    `article_type`        varchar(10)                                                   DEFAULT 'blog' COMMENT '文章类型',
     `user_name`           varchar(100)                                                  DEFAULT NULL COMMENT '用户名称',
     `nick_name`           varchar(100)                                                  DEFAULT NULL COMMENT '用户昵称',
     `like_status`         tinyint(1) NOT NULL DEFAULT '0' COMMENT '收藏状态:\n0:未处理;\n1:已经收藏过;\n2:收藏已满;\n3:参数缺失;\n9:收藏成功;',
