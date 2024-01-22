@@ -392,6 +392,7 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
         CsdnArticleInfo csdnArticleInfo = this.getArticleByArticleId(articleId);
         if (Objects.isNull(csdnArticleInfo)) {
             final String username = searchInner.getUsername();
+            final String nickname = searchInner.getNickname().replace("<em>", "").replace("</em>", "").trim();
             final String url = "https://blog.csdn.net/" + username + "/article/details/" + articleId;
             csdnArticleInfo = new CsdnArticleInfo();
             csdnArticleInfo.setArticleId(articleId);
@@ -399,7 +400,7 @@ public class CsdnArticleInfoServiceImpl extends ServiceImpl<CsdnArticleInfoMappe
             csdnArticleInfo.setArticleTitle(searchInner.getTitle());
             csdnArticleInfo.setArticleDescription(searchInner.getDescription());
             csdnArticleInfo.setUserName(username);
-            csdnArticleInfo.setNickName(searchInner.getNickname());
+            csdnArticleInfo.setNickName(nickname);
             csdnArticleInfo.setArticleScore(this.getScore(url));
             if (StringUtils.equalsIgnoreCase(selfUserName, username)) {
                 csdnArticleInfo.setIsMyself(1);

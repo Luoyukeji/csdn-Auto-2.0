@@ -117,5 +117,8 @@ public class CsdnUserSearch implements Serializable {
         private String so_type;
         private String comment;
         private Integer locationNum;
+        private Object collections;
+        private Object article_sco;
+        private Object ext_13;
     }
 }
