@@ -7,6 +7,14 @@ import com.kwan.springbootkwan.entity.query.CsdnUserInfoQuery;
 import java.util.List;
 
 
+/**
+ * 用户相关业务
+ *
+ * @author : qinyingjie
+ * @version : 2.2.0
+ * @date : 2024/1/22 16:32
+ */
+
 public interface CsdnUserInfoService extends IService<CsdnUserInfo> {
 
 

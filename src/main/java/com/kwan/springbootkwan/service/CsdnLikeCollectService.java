@@ -6,6 +6,13 @@ import com.kwan.springbootkwan.entity.csdn.LikeCollectResponse;
 import java.util.List;
 
 
+/**
+ * 点赞收藏
+ *
+ * @author : qinyingjie
+ * @version : 2.2.0
+ * @date : 2024/1/22 16:32
+ */
 public interface CsdnLikeCollectService {
 
     /**

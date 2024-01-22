@@ -1,7 +1,7 @@
 package com.kwan.springbootkwan.schedule;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.kwan.springbootkwan.entity.CsdnArticleInfo;
 import com.kwan.springbootkwan.entity.CsdnTripletDayInfo;
 import com.kwan.springbootkwan.entity.CsdnUserInfo;
@@ -21,6 +21,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -29,7 +30,6 @@ public class CsdnSchedule {
     private String selfUserName;
     @Value("${csdn.self_user_nick_name}")
     private String selfNickName;
-
     @Autowired
     private CsdnService csdnService;
     @Autowired
@@ -65,22 +65,22 @@ public class CsdnSchedule {
     @Scheduled(cron = "0 3 0 * * ?")
     public void resetTripletDayInfo() {
         CsdnTripletDayInfo csdnTripletDayInfo = csdnTripletDayInfoService.todayInfo();
-        // 重置文章状态
-        LambdaQueryWrapper<CsdnArticleInfo> wrapper = new LambdaQueryWrapper<>();
-        wrapper.and(queryWrapper -> queryWrapper.eq(
-                                CsdnArticleInfo::getLikeStatus, 0)
-                        .or().eq(CsdnArticleInfo::getLikeStatus, 2)
-                        .or().eq(CsdnArticleInfo::getCommentStatus, 0)
-                        .or().eq(CsdnArticleInfo::getCommentStatus, 2)
-                        .or().eq(CsdnArticleInfo::getCommentStatus, 3)
-                        .or().eq(CsdnArticleInfo::getCommentStatus, 4)
-                        .or().eq(CsdnArticleInfo::getCommentStatus, 5))
-                .eq(CsdnArticleInfo::getIsDelete, 0);
-        List<CsdnArticleInfo> list = csdnArticleInfoService.list(wrapper);
+        QueryWrapper<CsdnArticleInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.and(wrapper -> wrapper.eq("like_status", 0)
+                .or().eq("like_status", 2)
+        ).and(wrapper -> wrapper.eq("comment_status", 0)
+                .or().eq("comment_status", 2)
+                .or().eq("comment_status", 3)
+                .or().eq("comment_status", 4)
+                .or().eq("comment_status", 5)
+        ).eq("is_delete", 0);
+        List<CsdnArticleInfo> list = csdnArticleInfoService.list(queryWrapper);
         if (CollectionUtil.isNotEmpty(list)) {
             for (CsdnArticleInfo csdnArticleInfo : list) {
                 CsdnUserInfo csdnUserInfo = csdnUserInfoService.getUserByUserName(csdnArticleInfo.getUserName());
-                csdnArticleInfoService.checkBlogStatus(csdnTripletDayInfo, csdnArticleInfo, csdnUserInfo);
+                if (Objects.nonNull(csdnUserInfo)) {
+                    csdnArticleInfoService.checkBlogStatus(csdnTripletDayInfo, csdnArticleInfo, csdnUserInfo);
+                }
             }
         }
         final List<CsdnArticleInfo> articles100 = csdnArticleInfoService.getArticles100(selfNickName, selfUserName);
@@ -94,10 +94,9 @@ public class CsdnSchedule {
         csdnAccountManagementService.addAccountInfo();
     }
 
-    @ApiOperation(value = "自动评论(因为有一分钟之内只能发3条的限制,所以这里指定时间执行," +
+    @ApiOperation(value = "自动评论-因为有一分钟之内只能发3条的限制,所以这里指定时间执行," +
             "设置在下午执行主要是为了把每天仅有的48个评论留给评论自己的老铁和私信自己的老铁," +
-            "当然这里的私信人也必须是白名单的人,默认人是不三连的)"
-            , nickname = "自动评论(因为有一分钟之内只能发3条的限制,所以这里指定时间执行)")
+            "当然这里的私信人也必须是白名单里面的人,陌生人是不能三连的", nickname = "自动评论")
     @Scheduled(cron = "0 0/1 06,08,09,10,11,14,16,17,21,22,23 * * ?")
     public void frequentlyComment() {
         final List<CsdnUserInfo> csdnUserInfos = csdnUserInfoService.waitForCommentsUser();
