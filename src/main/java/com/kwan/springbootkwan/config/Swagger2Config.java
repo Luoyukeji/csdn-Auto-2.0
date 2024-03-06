@@ -33,7 +33,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("SpringBootStudy")
                 .pathMapping("/")
-                .enable(flag)
+                .enable(true)
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.kwan.springbootkwan.controller"))//需要生成接口文档的包名

@@ -1,6 +1,6 @@
 #秦英杰的号
 server:
-  port: 80
+  port: 8080
   compression:
     enabled: true
     min-response-size: 512KB
@@ -11,23 +11,23 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://43.xxxx.xxxx.xxx:3306/kwan?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/kwan?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     username: root
-    password: xxxx
+    password: hmmjyj1004.
 
 #csdn设置
 csdn:
-  self_user_name: "xxx"  #csdn自己的用户id
-  self_user_nick_name: "xxx"  #csdn自己的昵称
-  self_folder_id: 1234  #csdn自己的收藏夹id
+  self_user_name: "m0_68089732"  #csdn自己的用户id
+  self_user_nick_name: "落798."  #csdn自己的昵称
+  self_folder_id: 36565806  #csdn自己的收藏夹id
   auto_add_view_count: 2000  #刷浏览量数量
   auto_comment_count: 40  #评论个数
   #给别人的评论
-  self_comment: xxxx;xxxx;xxxx
+  self_comment: 非常感谢作者的分享，这篇文章对解决我当前遇到的问题非常有帮助。期待作者能够分享更多实用的知识和经验;文章的结构清晰，逻辑性强，对技术点的讲解非常有帮助。希望作者能继续分享更多专业知识。;博主文章写的十分细致，结构严谨。感谢博主分享
   #自动回复别人给我的评论
-  self_reply: xxxx;xxxx;xxxx
+  self_reply: 感谢大佬支持;您的赞赏是我继续分享的动力，感谢您的鼓励！
   #身份验证
-  cookie: "xxxxxxxxxxxxxxxx"
+  cookie: "uuid_tt_dd=10_19644600710-1646017058934-541262; __bid_n=1853927cc076acd8e44207; __gads=ID=0eb00b0d2cd5ea6e-22b11d7ab3dc006d:T=1679751702:RT=1679751702:S=ALNI_MZ69p-xAf2OHb8WA4yPoKLqFls1bg; FCNEC=%5B%5B%22AKsRol9dZAS_bmBM6sCNMWtbirmayUt64We4oEB_PUgpVnONaE4BjmptEWX0zcckZtDsTuEvXa5VpMrViQz8x-o9W5CiSzmSCE7QFtrL0SL_rJyM0zbBC05qnIW2URvVMQ2o2DShrBrCG2v3vzdMu_StRYAZiEF2-w%3D%3D%22%5D%2Cnull%2C%5B%5D%5D; FPTOKEN=7Yss2eRHA8m0Ct4hLoBndAaE9zYLhfpD6IbdtAn+gCUNq+96aPNdzuoi6aKgTzhkSXcKmN6Tv/BBbh1N6CM1rJyv7Yx1rj+qLBsqFn3YQPhuu4yQUXqOK5SMLwwVGK3sztOE34r+NN6KTd0QLcjz7ia8MmG5M5fRdLgmwHIE5xrvHbdmop7io0dYEG62SOIx5mB3RpFkmR3JFK6kb6DQ81/ZsUJc9YJJgh+ovWZoSzv0NYssyaguh3V1F3xAxjsNwRGgjp1aLZfoBSvOEwTn1gZrVXQdiEqbs1eJFBa0vAALnrjPSOZDhxWw8biT0RFDX9Lgt+22HUhhuq6xQNWv/1zvVEY7WDHH6CZZMZKpiXO9hOYYD3rEgXUqu1fo5ztqYw1E4LDfZQTzMv21POHwCw==|50DFEAq9hyXFW89VHJy74wTxkhp91xvBwL6iKb0Bapo=|10|b1ad00b79ad7ed6bbcd49909a43fb794; c_adb=1; p_uid=U010000; UserName=m0_68089732; UserInfo=02c424df21bc44e191d96eb88c235955; UserToken=02c424df21bc44e191d96eb88c235955; UserNick=%E8%90%BD798.; AU=D28; UN=m0_68089732; BT=1702998082800; Hm_up_6bcd52f51e9b3dce32bec4a3997715ac=%7B%22islogin%22%3A%7B%22value%22%3A%221%22%2C%22scope%22%3A1%7D%2C%22isonline%22%3A%7B%22value%22%3A%221%22%2C%22scope%22%3A1%7D%2C%22isvip%22%3A%7B%22value%22%3A%220%22%2C%22scope%22%3A1%7D%2C%22uid_%22%3A%7B%22value%22%3A%22m0_68089732%22%2C%22scope%22%3A1%7D%7D; Hm_ct_6bcd52f51e9b3dce32bec4a3997715ac=6525*1*10_19644600710-1646017058934-541262!5744*1*m0_68089732; c_dl_prid=-; c_dl_rid=1708066345422_490596; c_dl_fref=https://blog.csdn.net/m0_68089732/article/details/136127781; c_dl_fpage=/download/weixin_38727087/12825198; c_dl_um=-; c_segment=14; Hm_lvt_6bcd52f51e9b3dce32bec4a3997715ac=1709016735,1709045542,1709097580,1709175490; dc_sid=795fb928561e8ebe245a72c4127e194a; dp_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTgwMjgsImV4cCI6MTcxMDA4Njk2OSwiaWF0IjoxNzA5NDgyMTY5LCJ1c2VybmFtZSI6Im0wXzY4MDg5NzMyIn0.y6nm8bCpcsVrlsGTDSk8KY117SG3mkz8yKMCxo27Rp8; c_hasSub=true; m0_68089732comment_new=1709513408996; creative_btn_mp=3; fe_request_id=1709567765819_2276_9108311; dc_session_id=10_1709617260092.333104; https_ydclearance=d52077c02501ce6845583e9b-4370-45c8-ba13-77740d69f846-1709625219; c_first_ref=default; c_first_page=https%3A//blog.csdn.net/m0_68089732/article/details/136423445; c_dsid=11_1709620243691.396635; log_Id_click=2564; log_Id_view=5028; log_Id_pv=1869; creativeSetApiNew=%7B%22toolbarImg%22%3A%22https%3A//img-home.csdnimg.cn/images/20230921102607.png%22%2C%22publishSuccessImg%22%3A%22https%3A//img-home.csdnimg.cn/images/20230920034826.png%22%2C%22articleNum%22%3A245%2C%22type%22%3A2%2C%22oldUser%22%3Atrue%2C%22useSeven%22%3Afalse%2C%22oldFullVersion%22%3Atrue%2C%22userName%22%3A%22m0_68089732%22%7D; c_pref=https%3A//blog.csdn.net/m0_68089732%3Fspm%3D1010.2135.3001.5343; c_ref=https%3A//i.csdn.net/; Hm_lpvt_6bcd52f51e9b3dce32bec4a3997715ac=1709621493; c_page_id=default; dc_tos=s9v4ef"
   url:
     is_collect_url: "https://blog.csdn.net/phoenix/web/v1/isCollect" #是否收藏接口
     add_collect_url: "https://mp-action.csdn.net/interact/wrapper/pc/favorite/v1/api/addFavoriteInFolds" #添加收藏接口
